@@ -1,0 +1,66 @@
+@model WebTruyenHay.Models.ViewModels.ChapterViewModel
+@{
+    ViewData["Title"] = "Thêm chương mới";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus me-2"></i>Thêm chương mới cho "@Model.ComicTitle"
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateChapter" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="ComicId" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ChapterNumber" class="form-label">Số chương *</label>
+                                    <input asp-for="ChapterNumber" type="number" class="form-control" min="1" />
+                                    <span asp-validation-for="ChapterNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Title" class="form-label">Tiêu đề chương *</label>
+                                    <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề chương..." />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ảnh chương *</label>
+                            <input type="file" name="ImageFiles" class="form-control" multiple accept="image/*" required />
+                            <div class="form-text">
+                                Chọn nhiều ảnh để tạo thành một chương. Ảnh sẽ được sắp xếp theo thứ tự bạn chọn.
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong> Hãy chọn ảnh theo đúng thứ tự từ trang đầu đến trang cuối của chương.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Chapters", "Admin", new { id = Model.ComicId })" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Lưu chương
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

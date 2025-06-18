@@ -1,0 +1,32 @@
+@model List<WebTruyenHay.Models.Comment>
+@if (!Model.Any())
+{
+    <div class="no-comments">
+        <i class="fas fa-comments fa-2x mb-3"></i>
+        <p>💬 Chưa có bình luận nào</p>
+        <small>Hãy là người đầu tiên chia sẻ cảm nhận về chương này!</small>
+    </div>
+}
+else
+{
+    <div class="comments-container">
+        @foreach (var c in Model)
+        {
+            <div class="comment-item">
+                <div class="comment-header">
+                    <div class="user-info">
+                        <i class="fas fa-user-circle user-avatar"></i>
+                        <span class="username">@c.UserName</span>
+                    </div>
+                    <span class="comment-time">
+                        <i class="fas fa-clock me-1"></i>
+                        @c.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                </div>
+                <div class="comment-content">
+                    @c.Content
+                </div>
+            </div>
+        }
+    </div>
+}

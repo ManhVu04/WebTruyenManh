@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Quản trị - Trang chủ";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>Quản trị hệ thống</h2>
+            <p class="text-muted">Chào mừng bạn đến với trang quản trị Web Truyện Hay</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Quản lý truyện</h4>
+                            <p class="card-text">Thêm, sửa, xóa truyện</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="@Url.Action("Comics", "Admin")" class="text-white text-decoration-none">
+                        Xem chi tiết <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Thêm truyện mới</h4>
+                            <p class="card-text">Đăng truyện mới</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-plus fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="@Url.Action("CreateComic", "Admin")" class="text-white text-decoration-none">
+                        Thêm ngay <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Thống kê</h4>
+                            <p class="card-text">Xem thống kê hệ thống</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-bar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="text-white text-decoration-none">
+                        Xem chi tiết <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Cài đặt</h4>
+                            <p class="card-text">Cấu hình hệ thống</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-cog fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="text-white text-decoration-none">
+                        Cài đặt <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Hoạt động gần đây</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Chức năng này đang được phát triển...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

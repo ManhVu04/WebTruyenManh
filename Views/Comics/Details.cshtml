@@ -1,0 +1,146 @@
+@model WebTruyenHay.Models.Comic
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card">
+                <img src="@(string.IsNullOrEmpty(Model.CoverImageUrl) ? "/images/no-image.jpg" : Model.CoverImageUrl)" 
+                     class="card-img-top" alt="@Model.Title" style="height: 500px; object-fit: cover;">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (Model.Chapters.Any())
+                        {
+                            var firstChapter = Model.Chapters.OrderBy(c => c.ChapterNumber).First();
+                            <a href="@Url.Action("Read", "Comics", new { id = Model.Id, chapter = firstChapter.ChapterNumber })" 
+                               class="btn btn-primary btn-lg">
+                                <i class="fas fa-book-open me-2"></i>Đọc từ đầu
+                            </a>
+                            
+                            var latestChapter = Model.Chapters.OrderByDescending(c => c.ChapterNumber).First();
+                            if (latestChapter.ChapterNumber > 1)
+                            {
+                                <a href="@Url.Action("Read", "Comics", new { id = Model.Id, chapter = latestChapter.ChapterNumber })" 
+                                   class="btn btn-outline-primary">
+                                    <i class="fas fa-forward me-2"></i>Chương mới nhất
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary" disabled>Chưa có chương nào</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title">@Model.Title</h1>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Tác giả:</strong></div>
+                        <div class="col-sm-9">@Model.Author</div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Trạng thái:</strong></div>
+                        <div class="col-sm-9">
+                            @switch (Model.Status)
+                            {
+                                case "Đang tiến hành":
+                                    <span class="badge bg-success">Đang tiến hành</span>
+                                    break;
+                                case "Hoàn thành":
+                                    <span class="badge bg-primary">Hoàn thành</span>
+                                    break;
+                                case "Tạm ngưng":
+                                    <span class="badge bg-warning">Tạm ngưng</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Lượt xem:</strong></div>
+                        <div class="col-sm-9">@Model.ViewCount.ToString("N0")</div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Số chương:</strong></div>
+                        <div class="col-sm-9">@Model.Chapters.Count</div>
+                    </div>
+                    
+                    @if (Model.ComicGenres.Any())
+                    {
+                        <div class="row mb-3">
+                            <div class="col-sm-3"><strong>Thể loại:</strong></div>
+                            <div class="col-sm-9">
+                                @foreach (var genre in Model.ComicGenres)
+                                {
+                                    <a href="@Url.Action("Index", "Comics", new { genreId = genre.GenreId })" 
+                                       class="badge bg-secondary text-decoration-none me-1">@genre.Genre.Name</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Cập nhật:</strong></div>
+                        <div class="col-sm-9">@Model.UpdatedDate.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-sm-3"><strong>Mô tả:</strong></div>
+                            <div class="col-sm-9">
+                                <div class="text-justify">@Html.Raw(Model.Description.Replace("\n", "<br>"))</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Chapter List -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Danh sách chương</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Chapters.Any())
+                    {
+                        <div class="row">
+                            @foreach (var chapter in Model.Chapters.OrderByDescending(c => c.ChapterNumber))
+                            {
+                                <div class="col-lg-6 col-md-12 mb-2">
+                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                                        <div>
+                                            <a href="@Url.Action("Read", "Comics", new { id = Model.Id, chapter = chapter.ChapterNumber })" 
+                                               class="text-decoration-none fw-bold">
+                                                Chương @chapter.ChapterNumber: @chapter.Title
+                                            </a>
+                                            <div class="small text-muted">
+                                                @chapter.UpdatedDate.ToString("dd/MM/yyyy") • @chapter.ViewCount lượt xem
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Chưa có chương nào được đăng</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,184 @@
+@model WebTruyenHay.Models.Chapter
+@{
+    ViewData["Title"] = $"{ViewBag.Comic.Title} - Chương {Model.ChapterNumber}";
+    var comic = (WebTruyenHay.Models.Comic)ViewBag.Comic;
+    var allChapters = (List<WebTruyenHay.Models.Chapter>)ViewBag.AllChapters;
+    var currentChapterNumber = (int)ViewBag.CurrentChapterNumber;
+    var prevChapter = allChapters.Where(c => c.ChapterNumber < currentChapterNumber).OrderByDescending(c => c.ChapterNumber).FirstOrDefault();
+    var nextChapter = allChapters.Where(c => c.ChapterNumber > currentChapterNumber).OrderBy(c => c.ChapterNumber).FirstOrDefault();
+}
+
+<div class="reading-minimal-container">
+    <!-- Breadcrumb Navigation -->
+    <div class="reading-breadcrumb">
+        <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">Trang Chủ</a>
+        <span class="breadcrumb-separator">></span>
+        <a href="@Url.Action("Details", "Comics", new { id = comic.Id })" class="breadcrumb-link">@comic.Title</a>
+        <span class="breadcrumb-separator">></span>
+        <span class="breadcrumb-current">Chương @Model.ChapterNumber</span>
+    </div>
+    
+    <div class="reading-minimal-nav">
+        <!-- Previous Chapter -->
+        @if (prevChapter != null)
+        {
+            <a href="@Url.Action("Read", "Comics", new { id = comic.Id, chapter = prevChapter.ChapterNumber })" class="nav-btn nav-prev" title="Chương trước">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        }
+        else
+        {
+            <button class="nav-btn nav-prev disabled" disabled title="Không có chương trước">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        }
+        <!-- Menu Chapter Dropdown (Red Circle) -->
+        <div class="dropdown d-inline-block">
+            <button class="nav-btn nav-menu-red dropdown-toggle" type="button" id="chapterDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Danh sách chương">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark chapter-dropdown-minimal" aria-labelledby="chapterDropdown">
+                @foreach (var chapter in allChapters.OrderByDescending(c => c.ChapterNumber))
+                {
+                    <li>
+                        <a class="dropdown-item @(chapter.ChapterNumber == currentChapterNumber ? "active" : "")" 
+                           href="@Url.Action("Read", "Comics", new { id = comic.Id, chapter = chapter.ChapterNumber })">
+                            Chương @chapter.ChapterNumber @if (!string.IsNullOrEmpty(chapter.Title)) { <span>- @chapter.Title</span> }
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <!-- Next Chapter -->
+        @if (nextChapter != null)
+        {
+            <a href="@Url.Action("Read", "Comics", new { id = comic.Id, chapter = nextChapter.ChapterNumber })" class="nav-btn nav-next" title="Chương sau">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        }
+        else
+        {
+            <button class="nav-btn nav-next disabled" disabled title="Không có chương sau">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        }
+    </div>
+    <div class="reading-minimal-content">
+        @if (Model.ChapterImages.Any())
+        {
+            <div class="chapter-images-container">
+                @foreach (var image in Model.ChapterImages.OrderBy(i => i.PageNumber))
+                {
+                    <img src="@image.ImageUrl" alt="Trang @image.PageNumber" class="img-fluid chapter-image" loading="lazy" style="width: 100%; height: auto; display: block; margin: 0; padding: 0; border: none; vertical-align: top;">
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 no-images">
+                <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">📷 Chương này chưa có hình ảnh</h4>
+                <p class="text-muted">Vui lòng quay lại sau hoặc chọn chương khác</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.reading-minimal-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0;
+}
+.reading-breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0;
+    font-size: 14px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+.breadcrumb-link {
+    color: #e53935 !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.breadcrumb-link:hover {
+    color: #b71c1c !important;
+    text-decoration: underline;
+}
+.breadcrumb-separator {
+    color: rgba(255,255,255,0.6);
+    font-weight: bold;
+}
+.breadcrumb-current {
+    color: #fff;
+    font-weight: 600;
+}
+.reading-minimal-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    padding: 24px 0 12px 0;
+    background: transparent;
+}
+.nav-btn.nav-menu-red {
+    background: #e53935 !important;
+    color: #fff !important;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(229,57,53,0.15);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.nav-btn.nav-menu-red:hover {
+    background: #b71c1c !important;
+    box-shadow: 0 4px 18px rgba(229,57,53,0.25);
+}
+.nav-btn {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.nav-btn.disabled, .nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.chapter-dropdown-minimal {
+    min-width: 200px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+.reading-minimal-content {
+    margin-top: 12px;
+}
+@@media (max-width: 768px) {
+    .reading-minimal-container { max-width: 100vw; }
+    .reading-breadcrumb { 
+        font-size: 12px; 
+        gap: 6px; 
+        padding: 8px 12px; 
+        margin-bottom: 12px; 
+    }
+    .reading-minimal-nav { gap: 16px; padding: 16px 0 8px 0; }
+    .nav-btn, .nav-btn.nav-menu-red { width: 40px; height: 40px; font-size: 18px; }
+}
+</style>

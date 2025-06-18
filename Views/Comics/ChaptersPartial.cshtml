@@ -1,0 +1,24 @@
+@model List<WebTruyenHay.Models.Chapter>
+@{
+    var comicId = ViewBag.ComicId as int?;
+    var currentChapter = ViewBag.CurrentChapter as int?;
+}
+<div class="list-group list-group-flush chapters-sidebar">
+    @foreach (var chapter in Model.OrderByDescending(c => c.ChapterNumber))
+    {
+        <a href="@Url.Action("Read", "Comics", new { id = comicId, chapter = chapter.ChapterNumber })"
+           class="list-group-item list-group-item-action chapter-link @(currentChapter == chapter.ChapterNumber ? "active" : "")">
+            <div class="d-flex align-items-center">
+                <span class="chapter-number">📖 @chapter.ChapterNumber</span>
+                <div class="chapter-info flex-grow-1 ms-2">
+                    <div class="chapter-title">@chapter.Title</div>
+                    <small class="chapter-date">📅 @chapter.UpdatedDate.ToString("dd/MM/yyyy")</small>
+                </div>
+                @if (currentChapter == chapter.ChapterNumber)
+                {
+                    <i class="fas fa-play-circle current-indicator"></i>
+                }
+            </div>
+        </a>
+    }
+</div>

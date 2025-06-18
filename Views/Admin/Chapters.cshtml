@@ -1,0 +1,137 @@
+@model List<WebTruyenHay.Models.Chapter>
+@{
+    ViewData["Title"] = "Quản lý chương - " + ViewBag.Comic.Title;
+    var comic = (WebTruyenHay.Models.Comic)ViewBag.Comic;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Quản lý chương: @comic.Title</h2>
+            <p class="text-muted">Tổng số chương: @Model.Count</p>
+        </div>
+        <div>
+            <a href="@Url.Action("CreateChapter", "Admin", new { id = comic.Id })" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Thêm chương mới
+            </a>
+            <a href="@Url.Action("Comics", "Admin")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Số chương</th>
+                                <th>Tiêu đề</th>
+                                <th>Số trang</th>
+                                <th>Lượt xem</th>
+                                <th>Ngày tạo</th>
+                                <th>Cập nhật</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var chapter in Model.OrderBy(c => c.ChapterNumber))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>Chương @chapter.ChapterNumber</strong>
+                                    </td>
+                                    <td>@chapter.Title</td>
+                                    <td>
+                                        @chapter.ChapterImages.Count trang
+                                    </td>
+                                    <td>@chapter.ViewCount lượt xem</td>
+                                    <td>@chapter.CreatedDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@chapter.UpdatedDate.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (chapter.IsActive)
+                                        {
+                                            <span class="badge bg-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Đã ẩn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Read", "Comics", new { id = comic.Id, chapter = chapter.ChapterNumber })" 
+                                               class="btn btn-outline-info btn-sm" target="_blank">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="confirmDeleteChapter(@chapter.Id, '@chapter.Title')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Chưa có chương nào</h4>
+                    <p class="text-muted">Bắt đầu bằng cách thêm chương đầu tiên cho truyện này</p>
+                    <a href="@Url.Action("CreateChapter", "Admin", new { id = comic.Id })" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Thêm chương đầu tiên
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Chapter Confirmation Modal -->
+<div class="modal fade" id="deleteChapterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa chương</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa chương <strong id="chapterTitle"></strong>?</p>
+                <p class="text-danger"><small>Hành động này không thể hoàn tác.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteChapterForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa chương</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDeleteChapter(chapterId, chapterTitle) {
+    document.getElementById('chapterTitle').textContent = chapterTitle;
+    document.getElementById('deleteChapterForm').action = '@Url.Action("DeleteChapter", "Admin")/' + chapterId;
+    
+    var modal = new bootstrap.Modal(document.getElementById('deleteChapterModal'));
+    modal.show();
+}
+</script>

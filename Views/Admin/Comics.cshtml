@@ -1,0 +1,148 @@
+@model List<WebTruyenHay.Models.Comic>
+@{
+    ViewData["Title"] = "Quản lý truyện";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Quản lý truyện</h2>
+        <a href="@Url.Action("CreateComic", "Admin")" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Thêm truyện mới
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ảnh bìa</th>
+                            <th>Tên truyện</th>
+                            <th>Tác giả</th>
+                            <th>Trạng thái</th>
+                            <th>Số chương</th>
+                            <th>Lượt xem</th>
+                            <th>Cập nhật</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var comic in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@(string.IsNullOrEmpty(comic.CoverImageUrl) ? "/images/no-image.jpg" : comic.CoverImageUrl)" 
+                                         alt="@comic.Title" style="width: 50px; height: 70px; object-fit: cover;" class="rounded">
+                                </td>
+                                <td>
+                                    <strong>@comic.Title</strong>
+                                    @if (comic.ComicGenres.Any())
+                                    {
+                                        <br>
+                                        @foreach (var genre in comic.ComicGenres.Take(2))
+                                        {
+                                            <span class="badge bg-secondary me-1">@genre.Genre.Name</span>
+                                        }
+                                    }
+                                </td>
+                                <td>@comic.Author</td>
+                                <td>
+                                    @switch (comic.Status)
+                                    {
+                                        case "Đang tiến hành":
+                                            <span class="badge bg-success">Đang tiến hành</span>
+                                            break;
+                                        case "Hoàn thành":
+                                            <span class="badge bg-primary">Hoàn thành</span>
+                                            break;
+                                        case "Tạm ngưng":
+                                            <span class="badge bg-warning">Tạm ngưng</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Chapters", "Admin", new { id = comic.Id })" 
+                                       class="text-decoration-none">
+                                        @comic.Chapters.Count chương
+                                    </a>
+                                </td>
+                                <td>@comic.ViewCount.ToString("N0")</td>
+                                <td>@comic.UpdatedDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("EditComic", "Admin", new { id = comic.Id })" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Chapters", "Admin", new { id = comic.Id })" 
+                                           class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-list"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="confirmDelete(@comic.Id, '@comic.Title')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Chưa có truyện nào</h4>
+                    <p class="text-muted">Bắt đầu bằng cách thêm truyện đầu tiên</p>
+                    <a href="@Url.Action("CreateComic", "Admin")" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Thêm truyện mới
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa truyện <strong id="comicTitle"></strong>?</p>
+                <p class="text-danger"><small>Hành động này không thể hoàn tác.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(comicId, comicTitle) {
+    document.getElementById('comicTitle').textContent = comicTitle;
+    document.getElementById('deleteForm').action = '@Url.Action("DeleteComic", "Admin")/' + comicId;
+    
+    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
