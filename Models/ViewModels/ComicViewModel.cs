@@ -12,11 +12,10 @@ namespace WebTruyenHay.Models.ViewModels
         
         [StringLength(1000, ErrorMessage = "Mô tả không được vượt quá 1000 ký tự")]
         public string Description { get; set; } = string.Empty;
-        
-        [StringLength(500, ErrorMessage = "Tên tác giả không được vượt quá 500 ký tự")]
+          [StringLength(500, ErrorMessage = "Tên tác giả không được vượt quá 500 ký tự")]
         public string Author { get; set; } = string.Empty;
         
-        public string CoverImageUrl { get; set; } = string.Empty;
+        public string? CoverImageUrl { get; set; } = string.Empty;
         
         public string Status { get; set; } = "Đang tiến hành";
         

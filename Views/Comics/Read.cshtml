@@ -16,9 +16,7 @@
         <a href="@Url.Action("Details", "Comics", new { id = comic.Id })" class="breadcrumb-link">@comic.Title</a>
         <span class="breadcrumb-separator">></span>
         <span class="breadcrumb-current">Chương @Model.ChapterNumber</span>
-    </div>
-    
-    <div class="reading-minimal-nav">
+    </div>    <div class="reading-minimal-nav" id="chapterNav">
         <!-- Previous Chapter -->
         @if (prevChapter != null)
         {
@@ -62,8 +60,26 @@
                 <i class="fas fa-chevron-right"></i>
             </button>
         }
+    </div>    <!-- Floating Navigation Toggle Button -->
+    <div class="nav-toggle-btn" id="navToggle" title="Nhấn để hiện/ẩn điều hướng hoặc dùng phím M">
+        <i class="fas fa-bars"></i>
     </div>
-    <div class="reading-minimal-content">
+    
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress" id="readingProgress">
+        <div class="progress-bar"></div>
+    </div>
+      <!-- Keyboard Shortcuts Hint (appears briefly on first load) -->
+    <div class="keyboard-hint" id="keyboardHint">
+        <div class="hint-content">
+            <i class="fas fa-keyboard me-2"></i>
+            <div class="hint-text">
+                <div><strong>← →</strong> Chuyển chap | <strong>Space</strong> Cuộn trang</div>
+                <div><strong>M</strong> Hiện/ẩn menu | <strong>C</strong> Danh sách chap</div>
+                <small>Nhấn đôi hoặc vuốt lên để hiện menu</small>
+            </div>
+        </div>
+    </div><div class="reading-minimal-content">
         @if (Model.ChapterImages.Any())
         {
             <div class="chapter-images-container">
@@ -82,6 +98,85 @@
             </div>
         }
     </div>
+    
+    <!-- Comments Section -->    <div class="comments-section">
+        <div class="comments-header">
+            <h5 class="mb-3">
+                <i class="fas fa-comments me-2"></i>
+                Bình luận chương @Model.ChapterNumber
+                <small class="text-muted">(ID: @Model.Id)</small>
+            </h5>
+            <!-- Debug button -->
+            <button type="button" class="btn btn-sm btn-outline-light mb-3" onclick="loadComments()">
+                <i class="fas fa-refresh me-1"></i>
+                Tải lại bình luận
+            </button>
+        </div>
+        
+        @using Microsoft.AspNetCore.Identity
+        @inject SignInManager<IdentityUser> SignInManager
+          @if (SignInManager.IsSignedIn(User))
+        {
+            <!-- Comment Form for Logged-in Users -->
+            <div class="comment-form-container mb-4">
+                <form method="post" action="@Url.Action("Add", "Comments")" class="comment-form" data-ajax="true">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="chapterId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <textarea name="content" class="form-control comment-textarea" rows="3" 
+                                  placeholder="Chia sẻ cảm nhận của bạn về chương này..." required
+                                  maxlength="1000"></textarea>
+                        <div class="form-text text-muted small">
+                            <span class="char-count">0/1000 ký tự</span> | 
+                            <span class="keyboard-hint-small">Ctrl+Enter để gửi nhanh</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>
+                            Bình luận với tên: <strong>@(User.Identity?.Name ?? "Người dùng")</strong>
+                        </small>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-paper-plane me-1"></i>
+                            Gửi bình luận
+                        </button>
+                    </div>
+                </form>
+            </div>
+        }
+        else
+        {
+            <!-- Login Prompt for Anonymous Users -->
+            <div class="login-prompt mb-4">
+                <div class="alert alert-info d-flex align-items-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <div class="flex-grow-1">
+                        <strong>Đăng nhập để bình luận</strong>
+                        <p class="mb-0">Bạn cần đăng nhập để có thể chia sẻ cảm nhận về chương truyện này.</p>
+                    </div>
+                    <div class="ms-3">
+                        <a href="@Url.Page("/Account/Login", new { area = "Identity", returnUrl = Context.Request.Path })" 
+                           class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fas fa-sign-in-alt me-1"></i>
+                            Đăng nhập
+                        </a>
+                        <a href="@Url.Page("/Account/Register", new { area = "Identity", returnUrl = Context.Request.Path })" 
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>
+                            Đăng ký
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+          <!-- Comments List -->        <div class="comments-list" id="commentsContainer">
+            <!-- Comments will be loaded via AJAX -->
+            <div class="text-center py-4">
+                <i class="fas fa-spinner fa-spin me-2"></i>
+                Đang tải bình luận...
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -91,7 +186,7 @@
     padding: 0;
 }
 .reading-breadcrumb {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -100,6 +195,12 @@
     background: rgba(0,0,0,0.1);
     border-radius: 8px;
     margin-bottom: 16px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative;
+    width: 100%;
+    min-height: 40px;
+    transform: none !important;
 }
 .breadcrumb-link {
     color: #e53935 !important;
@@ -126,46 +227,251 @@
     gap: 32px;
     padding: 24px 0 12px 0;
     background: transparent;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Sticky Navigation Styles */
+.reading-minimal-nav.sticky-mode {
+    position: fixed;
+    top: 60px; /* Đẩy xuống dưới header */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999; /* Thấp hơn header nhưng cao hơn content */
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(15px);
+    border-radius: 0 0 20px 20px;
+    padding: 16px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 600px;
+    width: 90%;
+}
+
+.reading-minimal-nav.sticky-mode.hidden {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.reading-minimal-nav.sticky-mode.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+    visibility: visible;
+}
+
+/* Floating Navigation Toggle Button */
+.nav-toggle-btn {
+    position: fixed;
+    top: 130px; /* Điều chỉnh để tránh conflict với sticky nav */
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: rgba(229, 57, 53, 0.95);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    font-size: 20px;
+    box-shadow: 0 4px 20px rgba(229, 57, 53, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+    pointer-events: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-toggle-btn.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+.nav-toggle-btn:hover {
+    background: rgba(183, 28, 28, 1);
+    transform: translateY(0) scale(1.1);
+    box-shadow: 0 6px 25px rgba(229, 57, 53, 0.6);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-toggle-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+/* Keyboard Shortcuts Hint */
+.keyboard-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    z-index: 1002;
+    opacity: 0;
+    transition: all 0.5s ease;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.keyboard-hint.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.hint-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hint-text {
+    text-align: left;
+}
+
+.hint-text div {
+    margin-bottom: 4px;
+}
+
+.hint-text strong {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Reading Progress Bar */
+.reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1003;
+    opacity: 0.8;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #e53935, #ff5722);
+    transition: width 0.1s ease;
+}
+
+/* Auto-advance Notification */
+.auto-advance-notification {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: rgba(229, 57, 53, 0.95);
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 1004;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s ease;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.auto-advance-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.btn-close-notification {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.btn-close-notification:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+.nav-btn {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.nav-btn:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.nav-btn.disabled, .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
 .nav-btn.nav-menu-red {
     background: #e53935 !important;
     color: #fff !important;
-    border: none;
-    width: 48px;
-    height: 48px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    font-size: 22px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 12px rgba(229,57,53,0.15);
-    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 3px 15px rgba(229,57,53,0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .nav-btn.nav-menu-red:hover {
     background: #b71c1c !important;
-    box-shadow: 0 4px 18px rgba(229,57,53,0.25);
-}
-.nav-btn {
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    border: none;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    font-size: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-.nav-btn.disabled, .nav-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+    box-shadow: 0 5px 25px rgba(229,57,53,0.5);
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 .chapter-dropdown-minimal {
     min-width: 200px;
     max-height: 350px;
     overflow-y: auto;
+    z-index: 1100; /* Đảm bảo dropdown hiển thị trên sticky nav */
 }
 .reading-minimal-content {
     margin-top: 12px;
@@ -173,12 +479,851 @@
 @@media (max-width: 768px) {
     .reading-minimal-container { max-width: 100vw; }
     .reading-breadcrumb { 
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
         font-size: 12px; 
         gap: 6px; 
         padding: 8px 12px; 
         margin-bottom: 12px; 
+        min-height: 36px;
+        transform: none !important;
     }
-    .reading-minimal-nav { gap: 16px; padding: 16px 0 8px 0; }
-    .nav-btn, .nav-btn.nav-menu-red { width: 40px; height: 40px; font-size: 18px; }
+    .reading-minimal-nav { gap: 20px; padding: 16px 0 8px 0; }
+    .nav-btn, .nav-btn.nav-menu-red { 
+        width: 45px; 
+        height: 45px; 
+        font-size: 18px; 
+    }    /* Mobile sticky nav adjustments */
+    .reading-minimal-nav.sticky-mode {
+        width: 95%;
+        padding: 12px 16px;
+        border-radius: 0 0 16px 16px;
+        top: 56px; /* Điều chỉnh cho mobile header */
+    }
+    
+    /* Mobile floating button */
+    .nav-toggle-btn {
+        width: 50px;
+        height: 50px;
+        top: 120px; /* Điều chỉnh cho mobile */
+        right: 15px;
+        font-size: 18px;
+    }
+    
+    /* Mobile keyboard hint */
+    .keyboard-hint {
+        bottom: 15px;
+        left: 50%;
+        font-size: 12px;
+        padding: 10px 16px;
+        max-width: 90%;
+    }
+    
+    .keyboard-hint .hint-content {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .hint-text {
+        text-align: center;
+    }
+    
+    /* Mobile auto-advance notification */
+    .auto-advance-notification {
+        bottom: 20px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        font-size: 13px;
+        padding: 12px 16px;
+    }
+    
+    .notification-content {
+        flex-wrap: wrap;
+    }
+}
+
+/* Comments Section Styles */
+.comments-section {
+    margin-top: 40px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.comments-header h5 {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.comment-form-container {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comment-textarea {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.comment-textarea:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #e53935;
+    color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(229, 57, 53, 0.25);
+}
+
+.comment-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-prompt .alert {
+    background: rgba(23, 162, 184, 0.1);
+    border: 1px solid rgba(23, 162, 184, 0.3);
+    color: #fff;
+}
+
+.comments-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.comment-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 3px solid #e53935;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-avatar {
+    color: #e53935;
+    font-size: 18px;
+}
+
+.username {
+    font-weight: 600;
+    color: #fff;
+}
+
+.comment-time {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.comment-content {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.comments-wrapper {
+    width: 100%;
+    min-height: 50px;
+}
+
+.comments-count {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.no-comments {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.no-comments i {
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 15px;
+}
+
+.comments-container {
+    max-height: none;
+}
+
+.comment-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 3px solid #e53935;
+    transition: background 0.2s ease;
+}
+
+.comment-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+@@media (max-width: 768px) {
+    .comments-section {
+        margin-top: 30px;
+        padding: 15px;
+    }
+    
+    .comment-form-container {
+        padding: 15px;
+    }
+    
+    .login-prompt .alert {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .login-prompt .ms-3 {
+        margin-left: 0 !important;
+    }
+    
+    .comment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
 }
 </style>
+
+<!-- Nhúng jQuery trước các script custom -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    console.log('DOM Ready - Starting comment system initialization');
+    
+    // Debug thông tin chapter
+    console.log('Chapter ID:', @Model.Id);
+    console.log('Chapter Number:', @Model.ChapterNumber);
+    
+    // Load comments khi trang được tải với delay để đảm bảo DOM ready
+    setTimeout(function() {
+        loadComments();
+    }, 500);
+    
+    // Debug: Check if jQuery is loaded
+    console.log('jQuery version:', $.fn.jquery);
+    
+    // Xử lý submit form comment với event delegation để đảm bảo bind đúng
+    $(document).on('submit', '.comment-form', function(e) {
+        console.log('Form submit event triggered');
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var form = $(this);
+        var content = form.find('textarea[name="content"]').val().trim();
+        
+        console.log('Form data before validation:', {
+            content: content,
+            chapterId: form.find('input[name="chapterId"]').val(),
+            action: form.attr('action')
+        });
+        
+        if (!content) {
+            showMessage('Vui lòng nhập nội dung bình luận!', 'error');
+            return false;
+        }
+        
+        // Disable form while submitting
+        var submitBtn = form.find('button[type="submit"]');
+        var originalBtnText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...');
+        
+        // Get form data and ensure proper format
+        var formData = form.serialize();
+        var actionUrl = form.attr('action');
+        
+        console.log('Submitting comment via AJAX:', {
+            url: actionUrl,
+            data: formData,
+            method: 'POST'
+        });
+        
+        $.ajax({
+            url: actionUrl,
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            success: function(response) {
+                console.log('Comment submission success:', response);
+                if (response.success) {
+                    // Clear form
+                    form.find('textarea[name="content"]').val('');
+                    
+                    // Reload comments
+                    loadComments();
+                    
+                    // Show success message
+                    showMessage(response.message || 'Bình luận của bạn đã được thêm thành công!', 'success');
+                } else {
+                    showMessage(response.message || 'Có lỗi xảy ra khi thêm bình luận.', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error submitting comment:', error);
+                console.error('Status:', status);
+                console.error('Response:', xhr.responseText);
+                console.error('Response Status:', xhr.status);
+                
+                let errorMessage = 'Có lỗi xảy ra khi thêm bình luận. Vui lòng thử lại!';
+                
+                // Check specific error status codes
+                if (xhr.status === 401) {
+                    errorMessage = 'Bạn cần đăng nhập để bình luận.';
+                } else if (xhr.status === 403) {
+                    errorMessage = 'Bạn không có quyền thực hiện hành động này.';
+                } else if (xhr.status === 400) {
+                    errorMessage = 'Dữ liệu gửi lên không hợp lệ.';
+                }
+                
+                // Try to parse error response
+                try {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    if (errorResponse.message) {
+                        errorMessage = errorResponse.message;
+                    } else if (errorResponse.errors) {
+                        errorMessage = Object.values(errorResponse.errors).flat().join(', ');
+                    }
+                } catch (e) {
+                    console.log('Could not parse error response as JSON');
+                }
+                
+                showMessage(errorMessage, 'error');
+            },
+            complete: function() {
+                // Re-enable form
+                submitBtn.prop('disabled', false).html(originalBtnText);
+            }
+        });
+        
+        return false; // Ensure form doesn't submit normally
+    });    // Function to load comments
+    function loadComments() {
+        var chapterId = @Model.Id;
+        var commentsContainer = $('#commentsContainer');
+        
+        console.log('=== LOAD COMMENTS DEBUG ===');
+        console.log('Chapter ID:', chapterId);
+        console.log('Comments container element:', commentsContainer[0]);
+        console.log('Comments container length:', commentsContainer.length);
+        console.log('jQuery loaded:', typeof $ !== 'undefined');
+        
+        if (commentsContainer.length === 0) {
+            console.error('Comments container not found!');
+            return;
+        }
+        
+        // Show loading state
+        commentsContainer.html('<div class="text-center py-4 bg-info text-white"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải bình luận...</div>');
+        
+        var ajaxUrl = '@Url.Action("List", "Comments")';
+        console.log('AJAX URL:', ajaxUrl);
+        
+        $.ajax({
+            url: ajaxUrl,
+            type: 'GET',
+            data: { chapterId: chapterId },
+            cache: false,
+            timeout: 10000,
+            beforeSend: function() {
+                console.log('AJAX request starting...');
+            },
+            success: function(data, textStatus, xhr) {
+                console.log('=== AJAX SUCCESS ===');
+                console.log('Status:', textStatus);
+                console.log('Response status code:', xhr.status);
+                console.log('Response type:', typeof data);
+                console.log('Response length:', data ? data.length : 0);
+                
+                // Force update to see if element is working
+                commentsContainer.html('<div class="bg-success text-white p-3">TEST: AJAX thành công!</div>');
+                
+                setTimeout(function() {
+                    if (data && data.trim().length > 0) {
+                        console.log('Response preview:', data.substring(0, 300));
+                        commentsContainer.html(data);
+                        console.log('Comments content updated successfully');
+                    } else {
+                        console.log('Empty response, showing no comments message');
+                        commentsContainer.html('<div class="no-comments bg-warning p-3"><i class="fas fa-comments fa-2x mb-3"></i><p>💬 Chưa có bình luận nào</p><small>Hãy là người đầu tiên chia sẻ cảm nhận về chương này!</small></div>');
+                    }
+                }, 1000);
+            },
+            error: function(xhr, status, error) {
+                console.log('=== AJAX ERROR ===');
+                console.error('Error:', error);
+                console.error('Status:', status);
+                console.error('Status Code:', xhr.status);
+                console.error('Response Text:', xhr.responseText);
+                
+                commentsContainer.html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Lỗi tải bình luận: ' + error + ' (Status: ' + xhr.status + ') <button class="btn btn-link p-0 ms-2" onclick="loadComments()">Thử lại</button></div>');
+            },
+            complete: function() {
+                console.log('AJAX request completed');
+            }
+        });
+    }
+      // Make loadComments available globally for onclick events
+    window.loadComments = loadComments;
+    
+    // Function to show messages
+    function showMessage(message, type) {
+        // Remove any existing messages first
+        $('.alert.temp-message').remove();
+        
+        var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        var messageHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show temp-message" role="alert" style="position: relative; z-index: 1000;">
+                <i class="fas ${icon} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        // Insert message at the top of comments section
+        $('.comments-section').prepend(messageHtml);
+        
+        // Scroll to message
+        $('html, body').animate({
+            scrollTop: $('.comments-section').offset().top - 100
+        }, 500);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(function() {
+            $('.alert.temp-message').fadeOut(function() {
+                $(this).remove();
+            });        }, 5000);
+    }
+    
+    // Auto-resize textarea với improved handling
+    $(document).on('input', 'textarea.comment-textarea', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        
+        // Update character counter
+        var currentLength = $(this).val().length;
+        var maxLength = $(this).attr('maxlength') || 1000;
+        $(this).siblings('.form-text').find('.char-count').text(currentLength + '/' + maxLength + ' ký tự');
+        
+        // Change color based on length
+        var counterElement = $(this).siblings('.form-text').find('.char-count');
+        if (currentLength > maxLength * 0.9) {
+            counterElement.addClass('text-warning');
+        } else if (currentLength > maxLength * 0.95) {
+            counterElement.removeClass('text-warning').addClass('text-danger');
+        } else {
+            counterElement.removeClass('text-warning text-danger');
+        }
+    });
+    
+    // Enter key to submit comment (Ctrl+Enter or Shift+Enter)
+    $(document).on('keydown', 'textarea.comment-textarea', function(e) {
+        if ((e.ctrlKey || e.shiftKey) && e.which === 13) {
+            e.preventDefault();
+            $(this).closest('form').submit();
+        }
+    });
+    
+    // Prevent form submission on Enter key alone (to allow line breaks)
+    $(document).on('keypress', '.comment-form', function(e) {
+        if (e.which === 13 && !e.ctrlKey && !e.shiftKey && e.target.tagName.toLowerCase() === 'textarea') {
+            e.stopPropagation();
+            return true; // Allow line break
+        }
+    });
+      // Debug: Log when form is found
+    setTimeout(function() {
+        var forms = $('.comment-form');
+        console.log('Comment forms found after delay:', forms.length);
+        
+        if (forms.length > 0) {
+            console.log('Comment form details:', {
+                action: forms.attr('action'),
+                method: forms.attr('method'),
+                hasTextarea: forms.find('textarea[name="content"]').length > 0,
+                hasChapterId: forms.find('input[name="chapterId"]').length > 0,
+                hasAntiforgeryToken: forms.find('input[name="__RequestVerificationToken"]').length > 0
+            });
+            console.log('Comment form is ready for interaction');
+        } else {
+            console.warn('No comment form found on page');
+        }
+    }, 1000);
+    
+    // Additional debugging: Check form on page load
+    $(window).on('load', function() {
+        console.log('Window loaded - rechecking forms');
+        console.log('Forms after window load:', $('.comment-form').length);
+    });// Sticky Navigation Scroll Behavior
+    let lastScrollTop = 0;
+    let scrollTimeout;
+    let isNavVisible = true;
+    let isStickyMode = false;
+    const stickyNav = $('#chapterNav');
+    const navToggle = $('#navToggle');
+    const progressBar = $('.progress-bar');
+    const scrollThreshold = 30; // Minimum scroll distance to trigger hide/show
+    const hideDelay = 100; // Delay before hiding nav
+    const stickyTriggerPoint = 150; // When to switch to sticky mode
+    
+    // Calculate reading progress
+    function updateReadingProgress() {
+        const windowTop = $(window).scrollTop();
+        const documentHeight = $(document).height() - $(window).height();
+        const progress = (windowTop / documentHeight) * 100;
+        progressBar.css('width', Math.min(progress, 100) + '%');
+    }
+    
+    // Enable sticky mode
+    function enableStickyMode() {
+        if (!isStickyMode) {
+            stickyNav.addClass('sticky-mode visible');
+            isStickyMode = true;
+            isNavVisible = true;
+        }
+    }
+    
+    // Disable sticky mode
+    function disableStickyMode() {
+        if (isStickyMode) {
+            stickyNav.removeClass('sticky-mode visible hidden');
+            isStickyMode = false;
+            isNavVisible = true;
+        }
+    }
+    
+    // Show navigation
+    function showNavigation() {
+        if (isStickyMode && !isNavVisible) {
+            stickyNav.removeClass('hidden').addClass('visible');
+            isNavVisible = true;
+        }
+    }
+    
+    // Hide navigation
+    function hideNavigation() {
+        if (isStickyMode && isNavVisible && $(window).scrollTop() > stickyTriggerPoint) {
+            stickyNav.removeClass('visible').addClass('hidden');
+            isNavVisible = false;
+        }
+    }
+    
+    $(window).scroll(function() {
+        const currentScrollTop = $(this).scrollTop();
+        
+        // Update reading progress
+        updateReadingProgress();
+        
+        // Switch between normal and sticky mode
+        if (currentScrollTop > stickyTriggerPoint) {
+            enableStickyMode();
+        } else {
+            disableStickyMode();
+        }
+        
+        // Show/hide toggle button based on scroll position
+        if (currentScrollTop > 100) {
+            navToggle.addClass('visible');
+        } else {
+            navToggle.removeClass('visible');
+        }
+        
+        // Only handle hide/show when in sticky mode
+        if (isStickyMode) {
+            // Clear previous timeout
+            clearTimeout(scrollTimeout);
+            
+            // Add delay to prevent too frequent updates
+            scrollTimeout = setTimeout(function() {
+                const scrollDifference = Math.abs(currentScrollTop - lastScrollTop);
+                
+                // Only react to significant scroll movements
+                if (scrollDifference > scrollThreshold) {
+                    if (currentScrollTop > lastScrollTop && currentScrollTop > 200) {
+                        // Scrolling down - hide navigation after delay
+                        setTimeout(hideNavigation, hideDelay);
+                    } else if (currentScrollTop < lastScrollTop) {
+                        // Scrolling up - show navigation immediately
+                        showNavigation();
+                    }
+                    lastScrollTop = currentScrollTop;
+                }
+            }, 50);
+        }
+    });
+    
+    // Toggle button click handler
+    navToggle.click(function() {
+        if (isStickyMode) {
+            if (isNavVisible) {
+                hideNavigation();
+            } else {
+                showNavigation();
+                // Auto-hide after 5 seconds if scrolled down
+                setTimeout(function() {
+                    if ($(window).scrollTop() > 200) {
+                        hideNavigation();
+                    }
+                }, 5000);
+            }
+        } else {
+            // If not in sticky mode, scroll to top
+            $('html, body').animate({ scrollTop: 0 }, 500);
+        }
+    });
+    
+    // Show navigation on mouse movement near top
+    $(document).mousemove(function(e) {
+        if (e.pageY < 100 && isStickyMode) {
+            showNavigation();
+        }
+    });
+    
+    // Keep navigation visible when hovering over it
+    stickyNav.hover(
+        function() {
+            if (isStickyMode) {
+                showNavigation();
+            }
+        },
+        function() {
+            if (isStickyMode) {
+                // Auto-hide after leaving if scrolled down
+                setTimeout(function() {
+                    if ($(window).scrollTop() > 200 && !stickyNav.is(':hover')) {
+                        hideNavigation();
+                    }
+                }, 2000);
+            }
+        }
+    );// Show navigation when pressing keyboard shortcuts
+    $(document).keydown(function(e) {
+        // Arrow keys for navigation
+        if (e.which === 37) { // Left arrow - Previous chapter
+            e.preventDefault();
+            const prevLink = $('.nav-prev[href]');
+            if (prevLink.length) {
+                window.location.href = prevLink.attr('href');
+            }
+            return;
+        }
+        if (e.which === 39) { // Right arrow - Next chapter  
+            e.preventDefault();
+            const nextLink = $('.nav-next[href]');
+            if (nextLink.length) {
+                window.location.href = nextLink.attr('href');
+            }
+            return;
+        }
+        
+        // Space bar for scroll down, Shift+Space for scroll up
+        if (e.which === 32) { // Space
+            e.preventDefault();
+            const scrollAmount = $(window).height() * 0.8;
+            if (e.shiftKey) {
+                // Scroll up
+                $('html, body').animate({
+                    scrollTop: $(window).scrollTop() - scrollAmount
+                }, 300);
+            } else {
+                // Scroll down
+                $('html, body').animate({
+                    scrollTop: $(window).scrollTop() + scrollAmount
+                }, 300);
+            }
+        }
+        
+        // Home and End keys
+        if (e.which === 36) { // Home - Go to top
+            e.preventDefault();
+            $('html, body').animate({ scrollTop: 0 }, 500);
+        }
+        if (e.which === 35) { // End - Go to bottom
+            e.preventDefault();
+            $('html, body').animate({ scrollTop: $(document).height() }, 500);
+        }        // Show nav on certain keys
+        if (e.which === 37 || e.which === 39 || e.which === 32 || e.which === 33 || e.which === 34 || e.which === 77) { // M key
+            if (isStickyMode) {
+                showNavigation();
+                
+                // Auto-hide after 3 seconds if not near top
+                setTimeout(function() {
+                    if ($(window).scrollTop() > 200) {
+                        hideNavigation();
+                    }
+                }, 3000);
+            }
+        }
+        
+        // Toggle navigation with 'M' key
+        if (e.which === 77) { // M key
+            e.preventDefault();
+            if (isStickyMode) {
+                if (isNavVisible) {
+                    hideNavigation();
+                } else {
+                    showNavigation();
+                }
+            }
+        }
+        
+        // 'C' key to open chapter list
+        if (e.which === 67) { // C key
+            e.preventDefault();
+            if (isStickyMode) {
+                showNavigation();
+            }
+            $('#chapterDropdown').click();
+        }
+    });
+      // Touch gestures for mobile
+    let touchStartY = 0;
+    let touchEndY = 0;
+    
+    $(document).on('touchstart', function(e) {
+        touchStartY = e.originalEvent.changedTouches[0].screenY;
+    });
+    
+    $(document).on('touchend', function(e) {
+        touchEndY = e.originalEvent.changedTouches[0].screenY;
+        const touchDifference = touchStartY - touchEndY;        // Show nav on upward swipe
+        if (touchDifference < -50) {
+            if (isStickyMode) {
+                showNavigation();
+                // Auto-hide after 4 seconds
+                setTimeout(function() {
+                    if ($(window).scrollTop() > 200) {
+                        hideNavigation();
+                    }
+                }, 4000);
+            }
+        }
+    });
+    
+    // Show keyboard hint on first load
+    const keyboardHint = $('#keyboardHint');
+    setTimeout(function() {
+        keyboardHint.addClass('show');
+        // Auto-hide after 4 seconds
+        setTimeout(function() {
+            keyboardHint.removeClass('show');
+        }, 4000);
+    }, 1000);
+      // Show hint again when user scrolls past certain point for the first time
+    let hintShownOnScroll = localStorage.getItem('reading-hint-shown') === 'true';
+    let autoAdvanceShown = false;
+    
+    $(window).scroll(function() {
+        if (!hintShownOnScroll && $(this).scrollTop() > 300) {
+            keyboardHint.addClass('show');
+            localStorage.setItem('reading-hint-shown', 'true');
+            hintShownOnScroll = true;
+            
+            setTimeout(function() {
+                keyboardHint.removeClass('show');
+            }, 3000);
+        }
+        
+        // Auto-advance notification when near bottom
+        const scrollTop = $(this).scrollTop();
+        const documentHeight = $(document).height();
+        const windowHeight = $(window).height();
+        const scrollPercentage = (scrollTop / (documentHeight - windowHeight)) * 100;
+        
+        if (scrollPercentage > 90 && !autoAdvanceShown) {
+            const nextLink = $('.nav-next[href]');
+            if (nextLink.length) {
+                showAutoAdvanceNotification();
+                autoAdvanceShown = true;
+            }
+        }
+    });
+    
+    // Auto-advance notification
+    function showAutoAdvanceNotification() {
+        const notification = $('<div class="auto-advance-notification">' +
+            '<div class="notification-content">' +
+                '<i class="fas fa-arrow-right me-2"></i>' +
+                '<span>Nhấn phím → hoặc Space để chuyển chap tiếp theo</span>' +
+                '<button class="btn-close-notification">×</button>' +
+            '</div>' +
+        '</div>');
+        
+        $('body').append(notification);
+        
+        setTimeout(function() {
+            notification.addClass('show');
+        }, 100);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(function() {
+            notification.removeClass('show');
+            setTimeout(function() {
+                notification.remove();
+            }, 500);
+        }, 5000);
+        
+        // Close button
+        notification.find('.btn-close-notification').click(function() {
+            notification.removeClass('show');
+            setTimeout(function() {
+                notification.remove();
+            }, 500);
+        });
+    }
+    
+    // Double-tap to show navigation on mobile
+    let tapCount = 0;
+    let tapTimeout;
+    $(document).on('touchend', function(e) {
+        tapCount++;
+        if (tapCount === 1) {
+            tapTimeout = setTimeout(function() {
+                tapCount = 0;
+            }, 300);
+        } else if (tapCount === 2) {            clearTimeout(tapTimeout);
+            tapCount = 0;
+            // Double tap detected - show navigation
+            if (isStickyMode) {
+                showNavigation();
+                setTimeout(function() {
+                    if ($(window).scrollTop() > 200) {
+                        hideNavigation();
+                    }
+                }, 4000);
+            }
+        }
+    });
+});
+</script>

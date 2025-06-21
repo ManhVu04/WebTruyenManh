@@ -361,7 +361,6 @@ X:\WebTruyenHay\obj\Debug\net9.0\compressed\a3ygkwa5zy-2z0ns9nrw6.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\nezrqnk58p-muycvpuwrr.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\v0zgfp0y55-87fc7y1x7t.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\yfc7ypekbg-mlv21k5csn.gz
-X:\WebTruyenHay\obj\Debug\net9.0\compressed\bpstafapia-sqh2erx5a9.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\nc5g3kdbjs-h2dq95meyr.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\k9uoextiu0-97ezk6tnaf.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\1f18co6qi1-vmex8kfata.gz
@@ -441,10 +440,13 @@ X:\WebTruyenHay\obj\Debug\net9.0\refint\WebTruyenHay.dll
 X:\WebTruyenHay\obj\Debug\net9.0\WebTruyenHay.pdb
 X:\WebTruyenHay\obj\Debug\net9.0\WebTruyenHay.genruntimeconfig.cache
 X:\WebTruyenHay\obj\Debug\net9.0\ref\WebTruyenHay.dll
-X:\WebTruyenHay\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\y1ahs2txls-5ipweew5fc.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\64nx5s8695-5ipweew5fc.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\9se698q1nb-cbzqmqnw26.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\rx1ipllbii-5ipweew5fc.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\mun06h2vd9-8hubqafnl7.gz
 X:\WebTruyenHay\obj\Debug\net9.0\compressed\bwbhlx6qdo-5ipweew5fc.gz
+X:\WebTruyenHay\obj\Debug\net9.0\compressed\gv55eh2qmr-5ipweew5fc.gz
+X:\WebTruyenHay\obj\Debug\net9.0\compressed\bpstafapia-sqh2erx5a9.gz
+X:\WebTruyenHay\obj\Debug\net9.0\compressed\vkyke4lx7p-5ipweew5fc.gz
+X:\WebTruyenHay\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

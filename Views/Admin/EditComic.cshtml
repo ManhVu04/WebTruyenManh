@@ -11,11 +11,36 @@
                     <h4 class="mb-0">
                         <i class="fas fa-edit me-2"></i>Chỉnh sửa truyện: @Model.Title
                     </h4>
-                </div>
-                <div class="card-body">
-                    <form asp-action="EditComic" method="post" enctype="multipart/form-data">
+                </div>                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-warning">
+                            <h6>Validation Errors:</h6>
+                            <ul class="mb-0">
+                                @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@modelError.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }                    <form asp-action="EditComic" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
                         <input asp-for="Id" type="hidden" />
-                        <input asp-for="CoverImageUrl" type="hidden" />
+                        <input asp-for="CoverImageUrl" type="hidden" value="@(Model.CoverImageUrl ?? "")" />
                         
                         <div class="row">
                             <div class="col-md-6">
@@ -58,14 +83,12 @@
                                     <div class="form-text">Chỉ chọn nếu muốn thay đổi ảnh bìa hiện tại</div>
                                 </div>
                             </div>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+                        </div>                        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
                         {
                             <div class="mb-3">
                                 <label class="form-label">Ảnh bìa hiện tại:</label>
-                                <div class="mt-2">
-                                    <img src="@Model.CoverImageUrl" alt="Cover" class="img-thumbnail" style="max-width: 200px; max-height: 300px;" />
+                                <div class="mt-2 current-cover-container">
+                                    <img src="@Model.CoverImageUrl" alt="Cover" class="current-cover-image img-thumbnail" />
                                 </div>
                             </div>
                         }
@@ -110,4 +133,126 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    
+    <style>
+        /* Ensure cover image is always visible */
+        .current-cover-container {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative;
+            width: 100%;
+            max-width: 250px;
+            min-height: 200px;
+        }
+        
+        .current-cover-image {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: 100%;
+            max-width: 200px !important;
+            height: auto;
+            max-height: 300px !important;
+            min-height: 150px;
+            object-fit: contain;
+            transform: none !important;
+            transition: none !important;
+            z-index: 1;
+            position: relative;
+        }
+        
+        /* Override any conflicting styles from zoom or other CSS */
+        .current-cover-container,
+        .current-cover-container * {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transform: none !important;        }
+        
+        /* Responsive styles */
+        .current-cover-container {
+            max-width: 250px;
+        }
+        
+        .current-cover-image {
+            max-width: 200px !important;
+            max-height: 300px !important;
+        }        /* Mobile responsive */
+    </style>
+    
+    @{
+        WriteLiteral(@"
+        <style>
+            @media (max-width: 768px) {
+                .current-cover-container {
+                    max-width: 180px !important;
+                }
+                
+                .current-cover-image {
+                    max-width: 150px !important;
+                    max-height: 200px !important;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .current-cover-container {
+                    max-width: 150px !important;
+                }
+                
+                .current-cover-image {
+                    max-width: 120px !important;
+                    max-height: 160px !important;
+                }
+            }
+        </style>
+        ");
+    }
+    
+    <script>
+        $(document).ready(function() {
+            // Ensure image is always visible regardless of zoom level
+            function forceImageVisible() {
+                $('.current-cover-image, .current-cover-container').each(function() {
+                    $(this).css({
+                        'display': 'block',
+                        'visibility': 'visible',
+                        'opacity': '1',
+                        'transform': 'none'
+                    });
+                });
+            }
+            
+            // Force visibility on various events
+            forceImageVisible();
+            $(window).on('resize orientationchange zoom', forceImageVisible);
+            
+            // Set interval to ensure it stays visible
+            setInterval(forceImageVisible, 1000);
+            
+            $('form').on('submit', function(e) {
+                console.log('Form is being submitted');
+                console.log('Form data:', $(this).serialize());
+                
+                // Check if required fields are filled
+                var title = $('#Title').val();
+                var author = $('#Author').val();
+                
+                console.log('Title:', title);
+                console.log('Author:', author);
+                
+                if (!title || title.trim() === '') {
+                    alert('Tiêu đề không được để trống!');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Also check checkbox values
+            $('input[type="checkbox"]').on('change', function() {
+                console.log('Checkbox changed:', $(this).attr('name'), $(this).val(), $(this).prop('checked'));
+            });
+        });
+    </script>
 }

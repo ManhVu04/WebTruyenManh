@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Comments</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { padding: 20px; font-family: Arial, sans-serif; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .container { max-width: 600px; }
+        #commentsContainer { border: 2px solid #ccc; min-height: 100px; padding: 15px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Test Comments Loading</h2>
+        <div class="debug" id="debugInfo">
+            <strong>Debug Info:</strong>
+            <div id="debugContent">Loading...</div>
+        </div>
+        
+        <button type="button" onclick="testLoadComments()">Test Load Comments</button>
+        <button type="button" onclick="checkJQuery()">Check jQuery</button>
+        
+        <div id="commentsContainer">
+            <div>Initial content</div>
+        </div>
+    </div>
+
+    <script>
+        function checkJQuery() {
+            var debug = document.getElementById('debugContent');
+            debug.innerHTML = `
+                jQuery loaded: ${typeof $ !== 'undefined'}<br>
+                jQuery version: ${typeof $ !== 'undefined' ? $.fn.jquery : 'N/A'}<br>
+                Container found: ${$('#commentsContainer').length > 0}<br>
+                Container content: ${$('#commentsContainer').html()}
+            `;
+        }
+
+        function testLoadComments() {
+            console.log('=== TEST LOAD COMMENTS ===');
+            var container = $('#commentsContainer');
+            console.log('Container found:', container.length);
+            
+            // Test 1: Simple HTML update
+            container.html('<div style="background: yellow; padding: 10px;">Test 1: Simple update works!</div>');
+            
+            setTimeout(function() {
+                // Test 2: AJAX call to our actual endpoint
+                $.ajax({
+                    url: 'http://localhost:5242/Comments/List',
+                    type: 'GET',
+                    data: { chapterId: 11 },
+                    success: function(data) {
+                        console.log('AJAX Success!');
+                        console.log('Data type:', typeof data);
+                        console.log('Data length:', data ? data.length : 0);
+                        console.log('Data preview:', data ? data.substring(0, 200) : 'null');
+                        
+                        container.html('<div style="background: green; color: white; padding: 10px;">AJAX Success! Response: <pre>' + (data || 'Empty') + '</pre></div>');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('AJAX Error!');
+                        console.log('Status:', status);
+                        console.log('Error:', error);
+                        console.log('Response:', xhr.responseText);
+                        
+                        container.html('<div style="background: red; color: white; padding: 10px;">AJAX Error: ' + error + ' (Status: ' + xhr.status + ')</div>');
+                    }
+                });
+            }, 2000);
+        }
+
+        $(document).ready(function() {
+            console.log('Test page ready');
+            checkJQuery();
+        });
+    </script>
+</body>
+</html>

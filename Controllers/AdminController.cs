@@ -115,15 +115,13 @@ namespace WebTruyenHay.Controllers
             if (comic == null)
             {
                 return NotFound();
-            }
-
-            var model = new ComicViewModel
+            }            var model = new ComicViewModel
             {
                 Id = comic.Id,
                 Title = comic.Title,
                 Description = comic.Description,
                 Author = comic.Author,
-                CoverImageUrl = comic.CoverImageUrl,
+                CoverImageUrl = comic.CoverImageUrl ?? string.Empty,
                 Status = comic.Status,
                 SelectedGenreIds = comic.ComicGenres.Select(cg => cg.GenreId).ToList()
             };
@@ -131,9 +129,7 @@ namespace WebTruyenHay.Controllers
             var genres = await _context.Genres.ToListAsync();
             ViewBag.Genres = genres;
             return View(model);
-        }
-
-        // POST: Admin/EditComic/5
+        }        // POST: Admin/EditComic/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditComic(int id, ComicViewModel model)
@@ -145,59 +141,77 @@ namespace WebTruyenHay.Controllers
 
             if (ModelState.IsValid)
             {
-                var comic = await _context.Comics
-                    .Include(c => c.ComicGenres)
-                    .FirstOrDefaultAsync(c => c.Id == id);
-
-                if (comic == null)
+                try
                 {
-                    return NotFound();
-                }
+                    var comic = await _context.Comics
+                        .Include(c => c.ComicGenres)
+                        .FirstOrDefaultAsync(c => c.Id == id);
 
-                comic.Title = model.Title;
-                comic.Description = model.Description;
-                comic.Author = model.Author;
-                comic.Status = model.Status;
-                comic.UpdatedDate = DateTime.Now;
-
-                // Handle cover image upload
-                if (model.CoverImageFile != null)
-                {
-                    // Delete old image if exists
-                    if (!string.IsNullOrEmpty(comic.CoverImageUrl))
+                    if (comic == null)
                     {
-                        var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, comic.CoverImageUrl.TrimStart('/'));
-                        if (System.IO.File.Exists(oldImagePath))
+                        return NotFound();
+                    }
+
+                    comic.Title = model.Title;
+                    comic.Description = model.Description;
+                    comic.Author = model.Author;
+                    comic.Status = model.Status;
+                    comic.UpdatedDate = DateTime.Now;
+
+                    // Handle cover image upload
+                    if (model.CoverImageFile != null)
+                    {
+                        // Delete old image if exists
+                        if (!string.IsNullOrEmpty(comic.CoverImageUrl))
                         {
-                            System.IO.File.Delete(oldImagePath);
+                            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, comic.CoverImageUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
+
+                        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "comics");
+                        Directory.CreateDirectory(uploadsFolder);
+                        
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + model.CoverImageFile.FileName;
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                        
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.CoverImageFile.CopyToAsync(fileStream);
+                        }
+                        
+                        comic.CoverImageUrl = "/images/comics/" + uniqueFileName;
+                    }
+
+                    // Update genres
+                    _context.ComicGenres.RemoveRange(comic.ComicGenres);
+                    if (model.SelectedGenreIds != null && model.SelectedGenreIds.Any())
+                    {
+                        foreach (var genreId in model.SelectedGenreIds)
+                        {
+                            _context.ComicGenres.Add(new ComicGenre { ComicId = comic.Id, GenreId = genreId });
                         }
                     }
 
-                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "comics");
-                    Directory.CreateDirectory(uploadsFolder);
-                    
-                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + model.CoverImageFile.FileName;
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                    
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.CoverImageFile.CopyToAsync(fileStream);
-                    }
-                    
-                    comic.CoverImageUrl = "/images/comics/" + uniqueFileName;
+                    await _context.SaveChangesAsync();                    TempData["Success"] = "Cập nhật truyện thành công!";
+                    return RedirectToAction(nameof(Comics));
                 }
-
-                // Update genres
-                _context.ComicGenres.RemoveRange(comic.ComicGenres);
-                foreach (var genreId in model.SelectedGenreIds)
+                catch (Exception ex)
                 {
-                    _context.ComicGenres.Add(new ComicGenre { ComicId = comic.Id, GenreId = genreId });
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật truyện: " + ex.Message;
                 }
-
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Cập nhật truyện thành công!";
-                return RedirectToAction(nameof(Comics));
+            }
+            else
+            {
+                // Log validation errors for debugging
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .Select(x => new { Field = x.Key, Errors = x.Value?.Errors.Select(e => e.ErrorMessage) })
+                    .ToList();
+                    
+                TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại các trường thông tin.";
             }
 
             var genres = await _context.Genres.ToListAsync();
