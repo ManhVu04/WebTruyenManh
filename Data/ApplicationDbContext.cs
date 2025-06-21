@@ -15,9 +15,9 @@ namespace WebTruyenHay.Data
         public DbSet<Chapter> Chapters { get; set; }
         public DbSet<ChapterImage> ChapterImages { get; set; }
         public DbSet<Genre> Genres { get; set; }
-        public DbSet<ComicGenre> ComicGenres { get; set; }
-        public DbSet<Comment> Comments { get; set; } // Thêm DbSet<Comment> vào ApplicationDbContext để quản lý bình luận
+        public DbSet<ComicGenre> ComicGenres { get; set; }        public DbSet<Comment> Comments { get; set; } // Thêm DbSet<Comment> vào ApplicationDbContext để quản lý bình luận
         public DbSet<Follow> Follows { get; set; } // Thêm DbSet<Follow> để quản lý theo dõi truyện
+        public DbSet<ReadingHistory> ReadingHistories { get; set; } // Thêm DbSet<ReadingHistory> để quản lý lịch sử đọc
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,10 +55,26 @@ namespace WebTruyenHay.Data
                 .WithMany()
                 .HasForeignKey(f => f.ComicId)
                 .OnDelete(DeleteBehavior.Cascade);
-                
-            // Create unique index for UserId and ComicId to prevent duplicate follows
+                  // Create unique index for UserId and ComicId to prevent duplicate follows
             modelBuilder.Entity<Follow>()
                 .HasIndex(f => new { f.UserId, f.ComicId })
+                .IsUnique();
+                  // Configure ReadingHistory relationship
+            modelBuilder.Entity<ReadingHistory>()
+                .HasOne(rh => rh.Comic)
+                .WithMany()
+                .HasForeignKey(rh => rh.ComicId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            modelBuilder.Entity<ReadingHistory>()
+                .HasOne(rh => rh.Chapter)
+                .WithMany()
+                .HasForeignKey(rh => rh.ChapterId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            // Create unique index for UserId and ComicId to track only latest reading position per comic
+            modelBuilder.Entity<ReadingHistory>()
+                .HasIndex(rh => new { rh.UserId, rh.ComicId })
                 .IsUnique();
                 
             // Seed data for genres

@@ -10,27 +10,78 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-lg-4">
-            <div class="card">                <img src="@(string.IsNullOrEmpty(Model.Comic.CoverImageUrl) ? "/images/no-image.jpg" : Model.Comic.CoverImageUrl)" 
+            <div class="card">
+                <img src="@(string.IsNullOrEmpty(Model.Comic.CoverImageUrl) ? "/images/no-image.jpg" : Model.Comic.CoverImageUrl)" 
                      class="card-img-top" alt="@Model.Comic.Title" style="height: 500px; object-fit: cover;">
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         @if (Model.Comic.Chapters.Any())
                         {
-                            var firstChapter = Model.Comic.Chapters.OrderBy(c => c.ChapterNumber).First();
-                            <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = firstChapter.ChapterNumber })" 
-                               class="btn btn-primary btn-lg">
-                                <i class="fas fa-book-open me-2"></i>Đọc từ đầu
-                            </a>
-                            
-                            var latestChapter = Model.Comic.Chapters.OrderByDescending(c => c.ChapterNumber).First();
-                            if (latestChapter.ChapterNumber > 1)
+                            @* Show continue reading button if user has reading history *@
+                            @if (Model.ReadingHistory != null)
                             {
-                                <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = latestChapter.ChapterNumber })" 
-                                   class="btn btn-outline-primary">
-                                    <i class="fas fa-forward me-2"></i>Chương mới nhất
-                                </a>
+                                <div class="reading-progress-card mb-3">
+                                    <div class="progress-info">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-history me-1"></i>
+                                                Đang đọc
+                                            </span>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                @Model.ReadingHistory.LastReadDate.ToString("dd/MM HH:mm")
+                                            </small>
+                                        </div>
+                                        <h6 class="mb-2">Chương @Model.ReadingHistory.ChapterNumber</h6>
+                                        @{
+                                            var totalChapters = Model.Comic.Chapters.Count;
+                                            var progressPercent = (double)Model.ReadingHistory.ChapterNumber / totalChapters * 100;
+                                        }
+                                        <div class="progress mb-2" style="height: 6px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: @progressPercent.ToString("F1")%" 
+                                                 aria-valuenow="@Model.ReadingHistory.ChapterNumber" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="@totalChapters">
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">
+                                            @Model.ReadingHistory.ChapterNumber/@totalChapters chương 
+                                            (@progressPercent.ToString("F1")%)
+                                        </small>
+                                    </div>
+                                    <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = Model.ReadingHistory.ChapterNumber })" 
+                                       class="btn btn-success btn-lg w-100 mt-2 continue-reading-btn">
+                                        <i class="fas fa-play-circle me-2"></i>
+                                        Đọc tiếp chương @Model.ReadingHistory.ChapterNumber
+                                        <i class="fas fa-arrow-right ms-2"></i>
+                                    </a>
+                                </div>
                             }
-                        }                        @if (SignInManager.IsSignedIn(User))
+                            
+                            <div class="action-buttons">
+                                @{
+                                    var firstChapter = Model.Comic.Chapters.OrderBy(c => c.ChapterNumber).First();
+                                }
+                                <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = firstChapter.ChapterNumber })" 
+                                   class="btn @(Model.ReadingHistory != null ? "btn-outline-primary" : "btn-primary btn-lg") w-100">
+                                    <i class="fas fa-book-open me-2"></i>Đọc từ đầu
+                                </a>
+                                
+                                @{
+                                    var latestChapter = Model.Comic.Chapters.OrderByDescending(c => c.ChapterNumber).First();
+                                }
+                                @if (latestChapter.ChapterNumber > 1)
+                                {
+                                    <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = latestChapter.ChapterNumber })" 
+                                       class="btn btn-outline-secondary w-100 mt-2">
+                                        <i class="fas fa-fast-forward me-2"></i>Chương mới nhất (Ch.@latestChapter.ChapterNumber)
+                                    </a>
+                                }
+                            </div>
+                        }
+
+                        @if (SignInManager.IsSignedIn(User))
                         {
                             <partial name="_FollowButton" model="@(new WebTruyenHay.Models.ViewModels.FollowButtonViewModel { ComicId = Model.Comic.Id, IsFollowing = Model.IsFollowing })" />
                         }
@@ -44,7 +95,9 @@
                     </div>
                 </div>
             </div>
-        </div>        <div class="col-lg-8">
+        </div>
+
+        <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
                     <h1 class="card-title">@Model.Comic.Title</h1>
@@ -147,9 +200,219 @@
                         </div>
                     }
                 </div>
-            </div></div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+/* Reading Progress Card Styles */
+.reading-progress-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.reading-progress-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(-45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.reading-progress-card:hover::before {
+    opacity: 1;
+    transform: rotate(-45deg) translate(100%, 100%);
+}
+
+.reading-progress-card .progress-info {
+    position: relative;
+    z-index: 2;
+}
+
+.reading-progress-card .badge {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.85em;
+    padding: 6px 12px;
+}
+
+.reading-progress-card h6 {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.reading-progress-card .progress {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.reading-progress-card .progress-bar {
+    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 10px;
+    transition: width 0.8s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.reading-progress-card .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.continue-reading-btn {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    border: none !important;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.continue-reading-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.continue-reading-btn:hover::before {
+    left: 100%;
+}
+
+.continue-reading-btn:hover {
+    background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(17, 153, 142, 0.6);
+}
+
+.continue-reading-btn:active {
+    transform: translateY(-1px);
+}
+
+.continue-reading-btn i {
+    transition: transform 0.3s ease;
+}
+
+.continue-reading-btn:hover i.fa-arrow-right {
+    transform: translateX(5px);
+}
+
+.continue-reading-btn:hover i.fa-play-circle {
+    transform: scale(1.1);
+}
+
+/* Action Buttons Styles */
+.action-buttons .btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-buttons .btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.action-buttons .btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.action-buttons .btn-outline-secondary {
+    border-color: rgba(108, 117, 125, 0.5);
+    color: #6c757d;
+}
+
+.action-buttons .btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.action-buttons .btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.action-buttons .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.action-buttons .btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+    .reading-progress-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .continue-reading-btn {
+        font-size: 14px;
+        padding: 12px 20px;
+    }
+    
+    .action-buttons .btn {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+</style>
 
 @section Scripts {
     <script>

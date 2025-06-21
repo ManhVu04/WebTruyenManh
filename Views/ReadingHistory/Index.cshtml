@@ -1,0 +1,297 @@
+@model List<WebTruyenHay.Models.ReadingHistory>
+@{
+    ViewData["Title"] = "Lịch Sử Đọc";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-history me-2 text-primary"></i>
+                    Lịch Sử Đọc
+                </h2>
+                <small class="text-muted">
+                    @Model.Count truyện trong lịch sử
+                </small>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var history in Model)
+                    {
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card h-100 reading-history-card">
+                                <div class="position-relative">
+                                    <img src="@(string.IsNullOrEmpty(history.Comic.CoverImageUrl) ? "/images/no-image.jpg" : history.Comic.CoverImageUrl)" 
+                                         class="card-img-top" alt="@history.Comic.Title" 
+                                         style="height: 200px; object-fit: cover;">
+                                    
+                                    <!-- Reading Progress Badge -->
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success px-3 py-2">
+                                            <i class="fas fa-bookmark me-1"></i>
+                                            Chương @history.ChapterNumber
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Delete Button -->
+                                    <div class="position-absolute top-0 start-0 m-2">
+                                        <button class="btn btn-sm btn-outline-danger delete-history-btn" 
+                                                data-comic-id="@history.ComicId" 
+                                                data-comic-title="@history.Comic.Title"
+                                                title="Xóa khỏi lịch sử">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">
+                                        <a href="@Url.Action("Details", "Comics", new { id = history.ComicId })" 
+                                           class="text-decoration-none text-dark">
+                                            @history.Comic.Title
+                                        </a>
+                                    </h5>
+                                    
+                                    <div class="text-muted small mb-3">
+                                        <div class="mb-1">
+                                            <i class="fas fa-user me-1"></i>
+                                            @history.Comic.Author
+                                        </div>
+                                        <div class="mb-1">
+                                            <i class="fas fa-clock me-1"></i>
+                                            @history.LastReadDate.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-book me-1"></i>
+                                            @history.Comic.Chapters.Count chương
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-grid gap-2">
+                                            <!-- Continue Reading Button -->
+                                            <a href="@Url.Action("Read", "Comics", new { id = history.ComicId, chapter = history.ChapterNumber })" 
+                                               class="btn btn-primary">
+                                                <i class="fas fa-play me-1"></i>
+                                                Đọc tiếp chương @history.ChapterNumber
+                                            </a>
+                                            
+                                            <!-- View Details Button -->
+                                            <a href="@Url.Action("Details", "Comics", new { id = history.ComicId })" 
+                                               class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Xem chi tiết
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (ViewBag.CurrentPage > 1 || ViewBag.HasNextPage)
+                {
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav>
+                            <ul class="pagination">
+                                @if (ViewBag.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })">
+                                            <i class="fas fa-chevron-left me-1"></i>Trước
+                                        </a>
+                                    </li>
+                                }
+                                
+                                <li class="page-item active">
+                                    <span class="page-link">@ViewBag.CurrentPage</span>
+                                </li>
+                                
+                                @if (ViewBag.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })">
+                                            Sau<i class="fas fa-chevron-right ms-1"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-book-open fa-4x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">Chưa có lịch sử đọc</h4>
+                    <p class="text-muted mb-4">
+                        Bạn chưa đọc truyện nào. Hãy khám phá những bộ truyện hay nhé!
+                    </p>
+                    <a href="@Url.Action("Index", "Comics")" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>
+                        Khám phá truyện
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa <strong id="comic-title-to-delete"></strong> khỏi lịch sử đọc?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.reading-history-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.125);
+}
+
+.reading-history-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.delete-history-btn {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.delete-history-btn:hover {
+    opacity: 1;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 2px 8px rgba(40,167,69,0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-1px);
+}
+
+@@media (max-width: 768px) {
+    .card-img-top {
+        height: 150px !important;
+    }
+    
+    .col-lg-6.col-xl-4 {
+        margin-bottom: 1rem !important;
+    }
+}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Handle delete button clicks
+    $('.delete-history-btn').click(function(e) {
+        e.preventDefault();
+        
+        var comicId = $(this).data('comic-id');
+        var comicTitle = $(this).data('comic-title');
+        
+        $('#comic-title-to-delete').text(comicTitle);
+        $('#confirm-delete-btn').data('comic-id', comicId);
+        
+        $('#deleteModal').modal('show');
+    });
+    
+    // Handle confirm delete
+    $('#confirm-delete-btn').click(function() {
+        var comicId = $(this).data('comic-id');
+        var button = $(this);
+        
+        // Show loading state
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Đang xóa...');
+        
+        $.ajax({
+            url: '@Url.Action("Delete", "ReadingHistory")',
+            type: 'POST',
+            data: {
+                comicId: comicId,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Hide modal
+                    $('#deleteModal').modal('hide');
+                    
+                    // Remove the card from view
+                    $('[data-comic-id="' + comicId + '"]').closest('.col-lg-6').fadeOut(function() {
+                        $(this).remove();
+                        
+                        // Check if no items left
+                        if ($('.reading-history-card').length === 0) {
+                            location.reload(); // Reload to show empty state
+                        }
+                    });
+                    
+                    // Show success message
+                    showAlert('success', response.message);
+                } else {
+                    showAlert('error', response.message);
+                }
+            },
+            error: function() {
+                showAlert('error', 'Có lỗi xảy ra khi xóa lịch sử đọc.');
+            },
+            complete: function() {
+                // Reset button state
+                button.prop('disabled', false).html('Xóa');
+            }
+        });
+    });
+    
+    function showAlert(type, message) {
+        var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                       '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + ' me-2"></i>' +
+                       message +
+                       '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        
+        $('.container').prepend(alertHtml);
+        
+        // Auto hide after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
+});
+</script>
+
+@section Scripts {
+    @Html.AntiForgeryToken()
+}

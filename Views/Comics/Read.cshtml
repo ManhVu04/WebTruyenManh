@@ -234,16 +234,16 @@
 /* Sticky Navigation Styles */
 .reading-minimal-nav.sticky-mode {
     position: fixed;
-    top: 60px; /* Đẩy xuống dưới header */
+    top: 85px; /* Đẩy xuống dưới header (navbar + margin) */
     left: 50%;
     transform: translateX(-50%);
-    z-index: 999; /* Thấp hơn header nhưng cao hơn content */
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(15px);
+    z-index: 1020; /* Thấp hơn navbar (1030) để không bị che */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
     border-radius: 0 0 20px 20px;
     padding: 16px 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     max-width: 600px;
     width: 90%;
 }
@@ -265,7 +265,7 @@
 /* Floating Navigation Toggle Button */
 .nav-toggle-btn {
     position: fixed;
-    top: 130px; /* Điều chỉnh để tránh conflict với sticky nav */
+    top: 155px; /* Điều chỉnh để tránh conflict với sticky nav */
     right: 20px;
     width: 56px;
     height: 56px;
@@ -276,7 +276,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 1001;
+    z-index: 1021; /* Cao hơn sticky nav một chút nhưng thấp hơn navbar */
     font-size: 20px;
     box-shadow: 0 4px 20px rgba(229, 57, 53, 0.4);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -314,7 +314,7 @@
     padding: 12px 20px;
     border-radius: 25px;
     font-size: 14px;
-    z-index: 1002;
+    z-index: 1019; /* Thấp hơn navbar và sticky nav */
     opacity: 0;
     transition: all 0.5s ease;
     pointer-events: none;
@@ -356,7 +356,7 @@
     width: 100%;
     height: 3px;
     background: rgba(255, 255, 255, 0.1);
-    z-index: 1003;
+    z-index: 1031; /* Cao hơn navbar để luôn hiển thị progress */
     opacity: 0.8;
 }
 
@@ -377,7 +377,7 @@
     padding: 15px 20px;
     border-radius: 12px;
     font-size: 14px;
-    z-index: 1004;
+    z-index: 1018; /* Thấp hơn navbar và sticky nav */
     opacity: 0;
     transform: translateX(100%);
     transition: all 0.5s ease;
@@ -418,9 +418,9 @@
     border-radius: 50%;
 }
 .nav-btn {
-    background: rgba(255,255,255,0.12);
+    background: rgba(0, 0, 0, 0.4);
     color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -429,21 +429,21 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .nav-btn:hover:not(.disabled) {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.6);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .nav-btn.disabled, .nav-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-btn.nav-menu-red {
@@ -471,7 +471,7 @@
     min-width: 200px;
     max-height: 350px;
     overflow-y: auto;
-    z-index: 1100; /* Đảm bảo dropdown hiển thị trên sticky nav */
+    z-index: 1050; /* Đảm bảo dropdown hiển thị trên sticky nav và navbar */
 }
 .reading-minimal-content {
     margin-top: 12px;
@@ -499,14 +499,14 @@
         width: 95%;
         padding: 12px 16px;
         border-radius: 0 0 16px 16px;
-        top: 56px; /* Điều chỉnh cho mobile header */
+        top: 75px; /* Điều chỉnh cho mobile header */
     }
     
     /* Mobile floating button */
     .nav-toggle-btn {
         width: 50px;
         height: 50px;
-        top: 120px; /* Điều chỉnh cho mobile */
+        top: 140px; /* Điều chỉnh cho mobile */
         right: 15px;
         font-size: 18px;
     }

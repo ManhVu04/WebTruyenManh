@@ -4,17 +4,20 @@ using Microsoft.AspNetCore.Identity;
 using WebTruyenHay.Data;
 using WebTruyenHay.Models;
 using WebTruyenHay.Models.ViewModels;
+using WebTruyenHay.Services;
 
 namespace WebTruyenHay.Controllers
 {    public class ComicsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IReadingHistoryService _readingHistoryService;
 
-        public ComicsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public ComicsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IReadingHistoryService readingHistoryService)
         {
             _context = context;
             _userManager = userManager;
+            _readingHistoryService = readingHistoryService;
         }
 
         // GET: Comics
@@ -78,6 +81,7 @@ namespace WebTruyenHay.Controllers
             comic.ViewCount++;
             await _context.SaveChangesAsync();            // Kiểm tra trạng thái theo dõi của user hiện tại
             bool isFollowing = false;
+            ReadingHistory? readingHistory = null;
             if (User.Identity?.IsAuthenticated == true)
             {
                 var userId = _userManager.GetUserId(User);
@@ -85,17 +89,21 @@ namespace WebTruyenHay.Controllers
                 {
                     isFollowing = await _context.Follows
                         .AnyAsync(f => f.UserId == userId && f.ComicId == id);
+                    
+                    // Get reading history for this comic
+                    readingHistory = await _readingHistoryService.GetReadingHistoryAsync(userId, id.Value);
                 }
             }
 
             var viewModel = new ComicDetailsViewModel
             {
                 Comic = comic,
-                IsFollowing = isFollowing
-            };
+                IsFollowing = isFollowing,
+                ReadingHistory = readingHistory
+            };return View(viewModel);
+        }
 
-            return View(viewModel);
-        }// GET: Comics/Read/5?chapter=1 hoặc Comics/Read?comicId=5&chapterNumber=1
+        // GET: Comics/Read/5?chapter=1 hoặc Comics/Read?comicId=5&chapterNumber=1
         public async Task<IActionResult> Read(int? id, int chapter = 1, int? comicId = null, int? chapterNumber = null)
         {
             // Hỗ trợ cả 2 định dạng tham số
@@ -124,6 +132,16 @@ namespace WebTruyenHay.Controllers
             // Increase chapter view count
             currentChapter.ViewCount++;
             await _context.SaveChangesAsync();
+
+            // Save reading history for logged-in users
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = _userManager.GetUserId(User);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    await _readingHistoryService.UpdateReadingHistoryAsync(userId, targetComicId.Value, currentChapter.Id, targetChapter);
+                }
+            }
 
             ViewBag.Comic = comic;
             ViewBag.AllChapters = comic.Chapters.OrderBy(ch => ch.ChapterNumber).ToList();

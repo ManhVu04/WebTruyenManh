@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebTruyenHay.Data;
+using WebTruyenHay.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,9 @@ builder.Services.AddAuthentication()
 
 
 builder.Services.AddControllersWithViews();
+
+// Register custom services
+builder.Services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
 
 var app = builder.Build();
 
