@@ -1,0 +1,87 @@
+@model WebTruyenHay.Models.ViewModels.ChapterViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa chương";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Chỉnh sửa chương "@Model.Title" - @Model.ComicTitle
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditChapter" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="ComicId" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ChapterNumber" class="form-label">Số chương *</label>
+                                    <input asp-for="ChapterNumber" type="number" class="form-control" min="1" />
+                                    <span asp-validation-for="ChapterNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Title" class="form-label">Tiêu đề chương *</label>
+                                    <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề chương..." />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ảnh chương mới (tùy chọn)</label>
+                            <input type="file" name="ImageFiles" class="form-control" multiple accept="image/*" />
+                            <div class="form-text">
+                                Chọn ảnh mới để thay thế toàn bộ ảnh cũ của chương này. Bỏ trống nếu chỉ muốn sửa thông tin chương.
+                            </div>
+                        </div>
+
+                        @if (Model.ExistingImages != null && Model.ExistingImages.Any())
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Ảnh hiện tại của chương:</label>
+                                <div class="row">
+                                    @foreach (var image in Model.ExistingImages.OrderBy(i => i.PageNumber))
+                                    {
+                                        <div class="col-md-3 col-sm-4 col-6 mb-3">
+                                            <div class="card">
+                                                <img src="@image.ImageUrl" alt="Trang @image.PageNumber" class="card-img-top" style="height: 150px; object-fit: cover;" />
+                                                <div class="card-body p-2">
+                                                    <small class="text-muted">Trang @image.PageNumber</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Lưu ý:</strong> Nếu bạn tải lên ảnh mới, toàn bộ ảnh cũ sẽ bị thay thế. Hãy chọn ảnh theo đúng thứ tự từ trang đầu đến trang cuối.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Chapters", "Admin", new { id = Model.ComicId })" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-1"></i>Cập nhật chương
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

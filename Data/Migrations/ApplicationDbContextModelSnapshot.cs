@@ -384,6 +384,34 @@ namespace WebTruyenHay.Data.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("WebTruyenHay.Models.Follow", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ComicId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FollowedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComicId");
+
+                    b.HasIndex("UserId", "ComicId")
+                        .IsUnique();
+
+                    b.ToTable("Follows");
+                });
+
             modelBuilder.Entity("WebTruyenHay.Models.Genre", b =>
                 {
                     b.Property<int>("Id")
@@ -558,6 +586,17 @@ namespace WebTruyenHay.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Chapter");
+                });
+
+            modelBuilder.Entity("WebTruyenHay.Models.Follow", b =>
+                {
+                    b.HasOne("WebTruyenHay.Models.Comic", "Comic")
+                        .WithMany()
+                        .HasForeignKey("ComicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comic");
                 });
 
             modelBuilder.Entity("WebTruyenHay.Models.Chapter", b =>

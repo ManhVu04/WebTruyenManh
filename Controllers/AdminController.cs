@@ -327,30 +327,205 @@ namespace WebTruyenHay.Controllers
             }
 
             return View(model);
+        }        // GET: Admin/EditChapter/5
+        public async Task<IActionResult> EditChapter(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var chapter = await _context.Chapters
+                .Include(ch => ch.Comic)
+                .Include(ch => ch.ChapterImages)
+                .FirstOrDefaultAsync(ch => ch.Id == id);
+
+            if (chapter == null)
+            {
+                return NotFound();
+            }
+
+            var model = new ChapterViewModel
+            {
+                Id = chapter.Id,
+                Title = chapter.Title,
+                ChapterNumber = chapter.ChapterNumber,
+                ComicId = chapter.ComicId,
+                ComicTitle = chapter.Comic.Title,
+                ExistingImages = chapter.ChapterImages.OrderBy(img => img.PageNumber).ToList()
+            };
+
+            return View(model);
         }
 
-        // POST: Admin/DeleteComic/5
+        // POST: Admin/EditChapter/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditChapter(int id, ChapterViewModel model)
+        {
+            if (id != model.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var chapter = await _context.Chapters
+                    .Include(ch => ch.ChapterImages)
+                    .FirstOrDefaultAsync(ch => ch.Id == id);
+
+                if (chapter == null)
+                {
+                    return NotFound();
+                }
+
+                chapter.Title = model.Title;
+                chapter.ChapterNumber = model.ChapterNumber;
+                chapter.UpdatedDate = DateTime.Now;
+
+                // Handle new image uploads if provided
+                if (model.ImageFiles != null && model.ImageFiles.Any())
+                {
+                    // Delete old images
+                    if (chapter.ChapterImages != null && chapter.ChapterImages.Any())
+                    {
+                        foreach (var oldImage in chapter.ChapterImages)
+                        {
+                            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, oldImage.ImageUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
+                        _context.ChapterImages.RemoveRange(chapter.ChapterImages);
+                    }
+
+                    // Upload new images
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "chapters", chapter.Id.ToString());
+                    if (Directory.Exists(uploadsFolder))
+                    {
+                        Directory.Delete(uploadsFolder, true);
+                    }
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    int pageNumber = 1;
+                    foreach (var imageFile in model.ImageFiles)
+                    {
+                        if (imageFile.Length > 0)
+                        {
+                            var uniqueFileName = $"page_{pageNumber:D3}_{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
+                            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                            using (var fileStream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await imageFile.CopyToAsync(fileStream);
+                            }
+
+                            var chapterImage = new ChapterImage
+                            {
+                                ChapterId = chapter.Id,
+                                ImageUrl = $"/images/chapters/{chapter.Id}/{uniqueFileName}",
+                                PageNumber = pageNumber
+                            };
+
+                            _context.ChapterImages.Add(chapterImage);
+                            pageNumber++;
+                        }
+                    }
+                }
+
+                // Update comic's updated date
+                var comic = await _context.Comics.FindAsync(model.ComicId);
+                if (comic != null)
+                {
+                    comic.UpdatedDate = DateTime.Now;
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Cập nhật chương thành công!";
+                return RedirectToAction(nameof(Chapters), new { id = model.ComicId });
+            }
+
+            var comicForModel = await _context.Comics.FindAsync(model.ComicId);
+            if (comicForModel != null)
+            {
+                model.ComicTitle = comicForModel.Title;
+            }
+
+            return View(model);
+        }        // POST: Admin/DeleteComic/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteComic(int id)
         {
-            var comic = await _context.Comics
-                .Include(c => c.Chapters)
-                    .ThenInclude(ch => ch.ChapterImages)
-                .FirstOrDefaultAsync(c => c.Id == id);
-            if (comic != null)
+            try
             {
-                // Xóa ảnh bìa truyện nếu có
-                if (!string.IsNullOrEmpty(comic.CoverImageUrl))
+                var comic = await _context.Comics
+                    .Include(c => c.Chapters)
+                        .ThenInclude(ch => ch.ChapterImages)
+                    .FirstOrDefaultAsync(c => c.Id == id);
+                
+                if (comic != null)
                 {
-                    var coverPath = Path.Combine(_webHostEnvironment.WebRootPath, comic.CoverImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
-                    if (System.IO.File.Exists(coverPath))
-                        System.IO.File.Delete(coverPath);
-                }
+                    // Xóa ảnh bìa truyện nếu có
+                    if (!string.IsNullOrEmpty(comic.CoverImageUrl))
+                    {
+                        var coverPath = Path.Combine(_webHostEnvironment.WebRootPath, comic.CoverImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+                        if (System.IO.File.Exists(coverPath))
+                            System.IO.File.Delete(coverPath);
+                    }
 
-                // Xóa ảnh các chap và thư mục chứa ảnh
-                foreach (var chapter in comic.Chapters)
+                    // Xóa ảnh các chap và thư mục chứa ảnh
+                    foreach (var chapter in comic.Chapters)
+                    {
+                        if (chapter.ChapterImages != null)
+                        {
+                            foreach (var img in chapter.ChapterImages)
+                            {
+                                var imgPath = Path.Combine(_webHostEnvironment.WebRootPath, img.ImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+                                if (System.IO.File.Exists(imgPath))
+                                    System.IO.File.Delete(imgPath);
+                            }
+                            // Xóa thư mục chứa ảnh của chap
+                            var chapterFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "chapters", chapter.Id.ToString());
+                            if (Directory.Exists(chapterFolder))
+                                Directory.Delete(chapterFolder, true);
+                        }
+                    }
+
+                    // Xóa dữ liệu trong database
+                    _context.Comics.Remove(comic);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Xóa truyện thành công!";
+                }
+                else
                 {
+                    TempData["Error"] = "Không tìm thấy truyện để xóa!";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi xóa truyện: " + ex.Message;
+            }
+            
+            return RedirectToAction(nameof(Comics));
+        }        // POST: Admin/DeleteChapter/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteChapter(int id)
+        {
+            try
+            {
+                var chapter = await _context.Chapters
+                    .Include(ch => ch.ChapterImages)
+                    .FirstOrDefaultAsync(ch => ch.Id == id);
+                
+                if (chapter != null)
+                {
+                    var comicId = chapter.ComicId;
+                    
+                    // Xóa ảnh các trang của chap
                     if (chapter.ChapterImages != null)
                     {
                         foreach (var img in chapter.ChapterImages)
@@ -364,46 +539,22 @@ namespace WebTruyenHay.Controllers
                         if (Directory.Exists(chapterFolder))
                             Directory.Delete(chapterFolder, true);
                     }
+                    
+                    _context.Chapters.Remove(chapter);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Xóa chương thành công!";
+                    return RedirectToAction(nameof(Chapters), new { id = comicId });
                 }
-
-                // Xóa dữ liệu trong database
-                _context.Comics.Remove(comic);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Xóa truyện thành công!";
-            }
-            return RedirectToAction(nameof(Comics));
-        }
-
-        // POST: Admin/DeleteChapter/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteChapter(int id)
-        {
-            var chapter = await _context.Chapters
-                .Include(ch => ch.ChapterImages)
-                .FirstOrDefaultAsync(ch => ch.Id == id);
-            if (chapter != null)
-            {
-                // Xóa ảnh các trang của chap
-                if (chapter.ChapterImages != null)
+                else
                 {
-                    foreach (var img in chapter.ChapterImages)
-                    {
-                        var imgPath = Path.Combine(_webHostEnvironment.WebRootPath, img.ImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
-                        if (System.IO.File.Exists(imgPath))
-                            System.IO.File.Delete(imgPath);
-                    }
-                    // Xóa thư mục chứa ảnh của chap
-                    var chapterFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "chapters", chapter.Id.ToString());
-                    if (Directory.Exists(chapterFolder))
-                        Directory.Delete(chapterFolder, true);
+                    TempData["Error"] = "Không tìm thấy chương để xóa!";
                 }
-                var comicId = chapter.ComicId;
-                _context.Chapters.Remove(chapter);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Xóa chương thành công!";
-                return RedirectToAction(nameof(Chapters), new { id = comicId });
             }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi xóa chương: " + ex.Message;
+            }
+            
             return RedirectToAction(nameof(Comics));
         }
     }

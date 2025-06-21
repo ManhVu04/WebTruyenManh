@@ -1,0 +1,370 @@
+/* ========================================
+   DARK THEME FOR VIETNAMESE COMIC WEBSITE
+   ======================================== */
+
+/* === DARK THEME ROOT VARIABLES === */
+:root {
+    --dark-bg-primary: #0d1117;
+    --dark-bg-secondary: #161b22;
+    --dark-bg-tertiary: #21262d;
+    --dark-text-primary: #f0f6fc;
+    --dark-text-secondary: #8b949e;
+    --dark-text-muted: #6e7681;
+    --dark-border: #30363d;
+    --dark-accent-purple: #8b5cf6;
+    --dark-accent-blue: #58a6ff;
+    --dark-accent-green: #56d364;
+    --dark-accent-orange: #f78166;
+    --dark-card-bg: #21262d;
+    --dark-card-hover: #30363d;
+    --dark-gradient-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    --dark-gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* === GLOBAL DARK STYLES === */
+body {
+    background: var(--dark-gradient-primary) !important;
+    background-attachment: fixed !important;
+    color: var(--dark-text-primary) !important;
+    min-height: 100vh;
+}
+
+/* === TYPOGRAPHY DARK === */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--dark-text-primary) !important;
+}
+
+p {
+    color: var(--dark-text-secondary) !important;
+}
+
+.text-muted {
+    color: var(--dark-text-muted) !important;
+}
+
+/* === NAVIGATION DARK === */
+.navbar-dark {
+    background: rgba(13, 17, 23, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-bottom: 1px solid var(--dark-border) !important;
+}
+
+.navbar-brand {
+    color: var(--dark-text-primary) !important;
+}
+
+.nav-link {
+    color: var(--dark-text-secondary) !important;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--dark-accent-blue) !important;
+    background: rgba(88, 166, 255, 0.1) !important;
+}
+
+.nav-link.text-warning {
+    color: var(--dark-accent-orange) !important;
+}
+
+/* === MAIN CONTENT DARK === */
+.main-content {
+    background: transparent !important;
+    min-height: calc(100vh - 80px);
+}
+
+/* === CARDS DARK === */
+.card {
+    background: var(--dark-card-bg) !important;
+    border: 1px solid var(--dark-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.card:hover {
+    background: var(--dark-card-hover) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+.card-header {
+    background: var(--dark-bg-tertiary) !important;
+    border-bottom: 1px solid var(--dark-border) !important;
+    color: var(--dark-text-primary) !important;
+}
+
+.card-body {
+    color: var(--dark-text-secondary) !important;
+}
+
+.card-title {
+    color: var(--dark-text-primary) !important;
+}
+
+.card-text {
+    color: var(--dark-text-secondary) !important;
+}
+
+/* === ADMIN DASHBOARD CARDS === */
+.bg-primary {
+    background: linear-gradient(135deg, var(--dark-accent-blue), #4c9aff) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, var(--dark-accent-green), #40d478) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #17a2b8, #20c997) !important;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, var(--dark-accent-orange), #fd7e14) !important;
+}
+
+/* === BUTTONS DARK === */
+.btn {
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary {
+    background: var(--dark-accent-blue) !important;
+    border-color: var(--dark-accent-blue) !important;
+}
+
+.btn-primary:hover {
+    background: #4c9aff !important;
+    border-color: #4c9aff !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-outline-warning {
+    border-color: var(--dark-accent-orange) !important;
+    color: var(--dark-accent-orange) !important;
+}
+
+.btn-outline-warning:hover {
+    background: var(--dark-accent-orange) !important;
+    border-color: var(--dark-accent-orange) !important;
+}
+
+/* === FORMS DARK === */
+.form-control {
+    background: var(--dark-bg-tertiary) !important;
+    border: 1px solid var(--dark-border) !important;
+    color: var(--dark-text-primary) !important;
+    border-radius: 8px !important;
+}
+
+.form-control:focus {
+    background: var(--dark-bg-tertiary) !important;
+    border-color: var(--dark-accent-blue) !important;
+    color: var(--dark-text-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25) !important;
+}
+
+.form-control::placeholder {
+    color: var(--dark-text-muted) !important;
+}
+
+/* === SEARCH BAR DARK === */
+.bg-white.bg-opacity-10 {
+    background: rgba(33, 38, 45, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.placeholder-light::placeholder {
+    color: var(--dark-text-muted) !important;
+}
+
+/* === FOOTER DARK === */
+.footer.bg-dark {
+    background: var(--dark-bg-secondary) !important;
+    border-top: 1px solid var(--dark-border) !important;
+}
+
+/* === CONTAINERS DARK === */
+.container, .container-fluid {
+    position: relative;
+}
+
+/* === HOME PAGE SPECIFIC === */
+.hero-section {
+    background: rgba(13, 17, 23, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--dark-border) !important;
+}
+
+/* === COMIC GRID DARK === */
+.comic-card {
+    background: var(--dark-card-bg) !important;
+    border: 1px solid var(--dark-border) !important;
+}
+
+.comic-card:hover {
+    background: var(--dark-card-hover) !important;
+    border-color: var(--dark-accent-blue) !important;
+}
+
+/* === BADGES DARK === */
+.badge {
+    border-radius: 6px !important;
+}
+
+.badge.bg-primary {
+    background: var(--dark-accent-blue) !important;
+}
+
+.badge.bg-success {
+    background: var(--dark-accent-green) !important;
+}
+
+.badge.bg-warning {
+    background: var(--dark-accent-orange) !important;
+}
+
+/* === TABLES DARK === */
+.table {
+    color: var(--dark-text-primary) !important;
+}
+
+.table-dark {
+    background: var(--dark-bg-tertiary) !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td,
+.table-striped > tbody > tr:nth-of-type(odd) > th {
+    background: rgba(33, 38, 45, 0.5) !important;
+}
+
+/* === MODALS DARK === */
+.modal-content {
+    background: var(--dark-card-bg) !important;
+    border: 1px solid var(--dark-border) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--dark-border) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--dark-border) !important;
+}
+
+/* === DROPDOWN DARK === */
+.dropdown-menu {
+    background: var(--dark-card-bg) !important;
+    border: 1px solid var(--dark-border) !important;
+}
+
+.dropdown-item {
+    color: var(--dark-text-secondary) !important;
+}
+
+.dropdown-item:hover {
+    background: var(--dark-card-hover) !important;
+    color: var(--dark-text-primary) !important;
+}
+
+/* === SCROLLBAR DARK === */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--dark-accent-purple), var(--dark-accent-blue));
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #a855f7, #60a5fa);
+}
+
+/* === LINKS DARK === */
+a {
+    color: var(--dark-accent-blue) !important;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #4c9aff !important;
+}
+
+.text-decoration-none {
+    text-decoration: none !important;
+}
+
+/* === RESPONSIVE DARK === */
+@media (max-width: 768px) {
+    .navbar-dark {
+        background: rgba(13, 17, 23, 0.98) !important;
+    }
+}
+
+/* === CHAPTER READING DARK === */
+.chapter-content {
+    background: var(--dark-card-bg) !important;
+    border: 1px solid var(--dark-border) !important;
+}
+
+/* === COMMENTS DARK === */
+.comment-item {
+    background: var(--dark-card-bg) !important;
+    border: 1px solid var(--dark-border) !important;
+}
+
+/* === PAGINATION DARK === */
+.pagination .page-link {
+    background: var(--dark-card-bg) !important;
+    border: 1px solid var(--dark-border) !important;
+    color: var(--dark-text-secondary) !important;
+}
+
+.pagination .page-link:hover {
+    background: var(--dark-card-hover) !important;
+    color: var(--dark-text-primary) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--dark-accent-blue) !important;
+    border-color: var(--dark-accent-blue) !important;
+}
+
+/* === SPECIAL EFFECTS === */
+.glass-effect {
+    background: rgba(33, 38, 45, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* === FOCUS STYLES DARK === */
+.btn:focus, 
+.btn:active:focus, 
+.btn-link.nav-link:focus, 
+.form-control:focus, 
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25) !important;
+}
+
+/* === CUSTOM ANIMATIONS === */
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.loading-shimmer {
+    background: linear-gradient(90deg, var(--dark-bg-tertiary) 0px, var(--dark-card-hover) 40px, var(--dark-bg-tertiary) 80px);
+    background-size: 200px 100%;
+    animation: shimmer 1.3s infinite linear;
+}

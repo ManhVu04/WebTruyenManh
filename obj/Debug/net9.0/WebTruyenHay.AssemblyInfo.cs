@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebTruyenHay")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1c1ccdb6b7f732ba91111448161ac03c7d49ffd5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6285cbea416a3fe82b733c7c63e96f53ea1876e9")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebTruyenHay")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebTruyenHay")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

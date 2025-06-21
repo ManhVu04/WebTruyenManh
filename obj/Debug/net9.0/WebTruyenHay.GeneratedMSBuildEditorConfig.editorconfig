@@ -28,6 +28,10 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
+[X:/WebTruyenHay/Areas/Identity/Pages/Account/ExternalLogin.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcQWNjb3VudFxFeHRlcm5hbExvZ2luLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [X:/WebTruyenHay/Areas/Identity/Pages/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -88,6 +92,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ3JlYXRlQ29taWMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[X:/WebTruyenHay/Views/Admin/EditChapter.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdENoYXB0ZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[X:/WebTruyenHay/Views/Admin/EditComic.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdENvbWljLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [X:/WebTruyenHay/Views/Admin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -112,8 +124,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29tbWVudHNcX0NvbW1lbnRzTGlzdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[X:/WebTruyenHay/Views/Follow/MyFollows.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRm9sbG93XE15Rm9sbG93cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [X:/WebTruyenHay/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[X:/WebTruyenHay/Views/Home/Index_New.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleF9OZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [X:/WebTruyenHay/Views/Home/Privacy.cshtml]
@@ -122,6 +142,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [X:/WebTruyenHay/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[X:/WebTruyenHay/Views/Shared/_FollowButton.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Gb2xsb3dCdXR0b24uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [X:/WebTruyenHay/Views/Shared/_LoginPartial.cshtml]

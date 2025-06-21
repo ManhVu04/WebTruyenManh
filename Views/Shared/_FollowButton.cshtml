@@ -1,0 +1,111 @@
+@model WebTruyenHay.Models.ViewModels.FollowButtonViewModel
+
+<button class="btn @(Model.IsFollowing ? "btn-danger" : "btn-outline-danger") follow-btn" 
+        data-comic-id="@Model.ComicId"
+        data-following="@Model.IsFollowing.ToString().ToLower()"
+        title="@(Model.IsFollowing ? "Bỏ theo dõi truyện" : "Theo dõi truyện")">
+    <i class="@(Model.IsFollowing ? "fas" : "far") fa-heart"></i>
+    <span class="follow-text">@(Model.IsFollowing ? "Bỏ theo dõi" : "Theo dõi")</span>
+</button>
+
+<script>    $(document).ready(function() {
+        const comicId = @Model.ComicId;
+        const followBtn = $(`.follow-btn[data-comic-id="${comicId}"]`);
+        
+        console.log('Initializing follow button for comic:', comicId); // Debug log
+        console.log('Initial following status:', @Model.IsFollowing.ToString().ToLower()); // Debug log
+        
+        // Không cần gọi checkFollowStatus() nữa vì đã có dữ liệu từ server
+        // checkFollowStatus(comicId);
+        
+        // Không cần gọi getFollowCount() nữa vì đã có dữ liệu từ server
+        // getFollowCount(comicId);
+        
+        // Xử lý click nút theo dõi
+        followBtn.on('click', function(e) {
+            e.preventDefault();
+            console.log('Follow button clicked for comic:', comicId); // Debug log
+            toggleFollow(comicId);        });
+    });
+
+    function toggleFollow(comicId) {
+        const btn = $(`.follow-btn[data-comic-id="${comicId}"]`);
+        
+        // Vô hiệu hóa nút trong khi xử lý
+        btn.prop('disabled', true);
+          $.ajax({
+            url: '@Url.Action("Toggle", "Follow")',
+            type: 'POST',
+            data: { 
+                comicId: comicId,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },            success: function(response) {
+                btn.prop('disabled', false);
+                console.log('Toggle response:', response); // Debug log
+                  if (response.success) {
+                    updateFollowButton(comicId, response.isFollowing);
+                    showToast(response.message, 'success');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false);
+                showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+            }
+        });
+    }    function updateFollowButton(comicId, isFollowing) {
+        const btn = $(`.follow-btn[data-comic-id="${comicId}"]`);
+        const icon = btn.find('i');
+        const text = btn.find('.follow-text');
+        
+        console.log('Updating follow button:', comicId, 'isFollowing:', isFollowing, 'type:', typeof isFollowing); // Debug log
+        
+        // Đảm bảo isFollowing là boolean
+        const following = Boolean(isFollowing);
+        btn.data('following', following);
+        
+        if (following) {
+            btn.removeClass('btn-outline-danger').addClass('btn-danger');
+            icon.removeClass('far fa-heart').addClass('fas fa-heart');
+            text.text('Bỏ theo dõi');
+            btn.attr('title', 'Bỏ theo dõi truyện');
+        } else {
+            btn.removeClass('btn-danger').addClass('btn-outline-danger');
+            icon.removeClass('fas fa-heart').addClass('far fa-heart');
+            text.text('Theo dõi');
+            btn.attr('title', 'Theo dõi truyện');
+        }
+    }
+    
+    function showToast(message, type) {
+        // Tạo toast notification
+        const toastHtml = `
+            <div class="toast align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        // Thêm toast container nếu chưa có
+        if ($('#toast-container').length === 0) {
+            $('body').append('<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>');
+        }
+        
+        const $toast = $(toastHtml);
+        $('#toast-container').append($toast);
+        
+        const toast = new bootstrap.Toast($toast[0]);
+        toast.show();
+        
+        // Tự động xóa toast sau khi ẩn
+        $toast.on('hidden.bs.toast', function() {
+            $(this).remove();
+        });
+    }
+</script>

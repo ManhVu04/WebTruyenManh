@@ -18,12 +18,18 @@
                 <i class="fas fa-arrow-left me-1"></i>Quay lại
             </a>
         </div>
-    </div>
-
-    @if (TempData["Success"] != null)
+    </div>    @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -69,15 +75,17 @@
                                         {
                                             <span class="badge bg-secondary">Đã ẩn</span>
                                         }
-                                    </td>
-                                    <td>
+                                    </td>                                    <td>
                                         <div class="btn-group" role="group">
                                             <a href="@Url.Action("Read", "Comics", new { id = comic.Id, chapter = chapter.ChapterNumber })" 
                                                class="btn btn-outline-info btn-sm" target="_blank">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                    onclick="confirmDeleteChapter(@chapter.Id, '@chapter.Title')">
+                                            <a href="@Url.Action("EditChapter", "Admin", new { id = chapter.Id })" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="deleteChapter(@chapter.Id, '@Html.Raw(Html.Encode(chapter.Title).Replace("'", "\\'"))')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -103,35 +111,31 @@
     </div>
 </div>
 
-<!-- Delete Chapter Confirmation Modal -->
-<div class="modal fade" id="deleteChapterModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Xác nhận xóa chương</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Bạn có chắc chắn muốn xóa chương <strong id="chapterTitle"></strong>?</p>
-                <p class="text-danger"><small>Hành động này không thể hoàn tác.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <form id="deleteChapterForm" method="post" style="display: inline;">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger">Xóa chương</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Hidden form for delete chapter action -->
+<form id="deleteChapterForm" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteChapterId" />
+</form>
 
 <script>
-function confirmDeleteChapter(chapterId, chapterTitle) {
-    document.getElementById('chapterTitle').textContent = chapterTitle;
-    document.getElementById('deleteChapterForm').action = '@Url.Action("DeleteChapter", "Admin")/' + chapterId;
-    
-    var modal = new bootstrap.Modal(document.getElementById('deleteChapterModal'));
-    modal.show();
+function deleteChapter(chapterId, chapterTitle) {
+    // Use native confirm dialog - no modal issues
+    if (confirm(`Bạn có chắc chắn muốn xóa chương "${chapterTitle}"?\n\nHành động này không thể hoàn tác!`)) {
+        // Set the ID and submit form
+        document.getElementById('deleteChapterId').value = chapterId;
+        var form = document.getElementById('deleteChapterForm');
+        form.action = '@Url.Action("DeleteChapter", "Admin")';
+        form.submit();
+    }
 }
+
+// Clean up any modal remnants on page load
+document.addEventListener('DOMContentLoaded', function() {
+    var backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(function(backdrop) { backdrop.remove(); });
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+});
 </script>
+

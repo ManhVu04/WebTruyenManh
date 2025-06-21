@@ -17,6 +17,7 @@ namespace WebTruyenHay.Data
         public DbSet<Genre> Genres { get; set; }
         public DbSet<ComicGenre> ComicGenres { get; set; }
         public DbSet<Comment> Comments { get; set; } // Thêm DbSet<Comment> vào ApplicationDbContext để quản lý bình luận
+        public DbSet<Follow> Follows { get; set; } // Thêm DbSet<Follow> để quản lý theo dõi truyện
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +48,18 @@ namespace WebTruyenHay.Data
                 .HasOne(ci => ci.Chapter)
                 .WithMany(ch => ch.ChapterImages)
                 .HasForeignKey(ci => ci.ChapterId);
+                
+            // Configure Follow relationship
+            modelBuilder.Entity<Follow>()
+                .HasOne(f => f.Comic)
+                .WithMany()
+                .HasForeignKey(f => f.ComicId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            // Create unique index for UserId and ComicId to prevent duplicate follows
+            modelBuilder.Entity<Follow>()
+                .HasIndex(f => new { f.UserId, f.ComicId })
+                .IsUnique();
                 
             // Seed data for genres
             modelBuilder.Entity<Genre>().HasData(

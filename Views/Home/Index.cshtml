@@ -1,471 +1,645 @@
-﻿@model List<WebTruyenHay.Models.Comic>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@model List<WebTruyenHay.Models.Comic>
 @{
     ViewData["Title"] = "Trang Chủ - Góc Truyện Tranh";
 }
 
-<div class="container py-4">
-<!-- Hero Section -->
-<section class="hero-section mb-5">
-    <div class="container">
-        <div class="row align-items-center py-5">
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <div class="hero-content fade-in-up">
-                    <h1 class="display-4 fw-bold mb-4">
-                        <span class="text-gradient">Góc Truyện Tranh</span>
-                    </h1>
-                    <p class="lead mb-4 text-muted">
-                        Khám phá thế giới truyện tranh tuyệt vời với hàng ngàn bộ truyện chất lượng cao, 
-                        cập nhật liên tục và hoàn toàn miễn phí.
-                    </p>
-                    <div class="hero-buttons">
-                        <a href="@Url.Action("Index", "Comics")" class="btn btn-primary btn-lg me-3 mb-2">
-                            <i class="fas fa-compass me-2"></i>
-                            Khám phá ngay
-                        </a>
-                        <a href="#popular-comics" class="btn btn-outline-primary btn-lg mb-2">
-                            <i class="fas fa-fire me-2"></i>
-                            Truyện hot
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="hero-image text-center">
-                    <div class="hero-card bg-glass shadow-custom">
-                        <i class="fas fa-book-open text-gradient" style="font-size: 8rem;"></i>
-                        <h5 class="mt-3 mb-2">Đọc truyện mọi lúc, mọi nơi</h5>
-                        <p class="text-muted">Giao diện thân thiện, tốc độ tải nhanh</p>
-                    </div>
-                </div>
+@Html.AntiForgeryToken()
+
+<div class="home-container">
+    <!-- Header Banner -->
+    <div class="hero-banner">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Góc Truyện Tranh</h1>
+                <p class="hero-subtitle">Đọc truyện tranh online miễn phí, cập nhật liên tục</p>
             </div>
         </div>
     </div>
-</section>
 
-<!-- Recent Updates Section -->
-<section class="mb-5">
     <div class="container">
-        <div class="section-header d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title">
-                <i class="fas fa-clock text-primary me-2"></i>
-                Cập nhật gần đây
-            </h2>
-            <a href="@Url.Action("Index", "Comics")" class="btn btn-outline-primary">
-                Xem tất cả
-                <i class="fas fa-arrow-right ms-1"></i>
-            </a>
-        </div>
-        
-        <div class="row g-4">
-            @foreach (var comic in Model.Take(6))
-            {
-                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6">
-                    <div class="comic-card-modern">
-                        <a href="@Url.Action("Details", "Comics", new { id = comic.Id })" class="text-decoration-none">
-                            <div class="comic-image-container">
+        <!-- Cập nhật gần đây -->
+        <section class="comics-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Cập nhật gần đây
+                </h2>
+                <a href="@Url.Action("Index", "Comics")" class="view-all-btn">
+                    Xem tất cả <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="comics-grid">
+                @foreach (var comic in Model.Take(12))
+                {
+                    <div class="comic-card">
+                        <a href="@Url.Action("Details", "Comics", new { id = comic.Id })" class="comic-link">
+                            <div class="comic-image-wrapper">
                                 <img src="@(string.IsNullOrEmpty(comic.CoverImageUrl) ? "/images/no-image.svg" : comic.CoverImageUrl)" 
-                                     class="comic-image" alt="@comic.Title">
+                                     alt="@comic.Title" class="comic-image">
                                 <div class="comic-overlay">
-                                    <div class="comic-info">
-                                        <span class="chapter-count">
-                                            <i class="fas fa-book me-1"></i>
-                                            @comic.Chapters.Count chương
+                                    <div class="comic-stats">
+                                        <span class="view-count">
+                                            <i class="fas fa-eye"></i>
+                                            @comic.ViewCount.ToString("N0")
+                                        </span>
+                                        <span class="rating">
+                                            <i class="fas fa-star"></i>
+                                            4.5
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="comic-content">
-                                <h6 class="comic-title" title="@comic.Title">@comic.Title</h6>
+                            
+                            <div class="comic-info">
+                                <h3 class="comic-title">@comic.Title</h3>
                                 <p class="comic-author">@comic.Author</p>
-                                @if (comic.Chapters.Any())
-                                {
-                                    var latestChapter = comic.Chapters.OrderByDescending(c => c.UpdatedDate).First();
-                                    <div class="latest-chapter">
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-bookmark me-1"></i>
-                                            Chương @latestChapter.ChapterNumber
-                                        </span>
-                                    </div>
-                                }
+                                
+                                <!-- Recent Chapters -->
+                                <div class="recent-chapters">
+                                    @if (comic.Chapters.Any())
+                                    {
+                                        var recentChapters = comic.Chapters.OrderByDescending(c => c.UpdatedDate).Take(3);
+                                        foreach (var chapter in recentChapters)
+                                        {
+                                            <div class="chapter-item">
+                                                <span class="chapter-number">@chapter.ChapterNumber</span>
+                                                <span class="chapter-time">@chapter.UpdatedDate.ToString("dd/MM")</span>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="chapter-item">
+                                            <span class="no-chapters">Chưa có chương</span>
+                                        </div>
+                                    }
+                                </div>
                             </div>
                         </a>
                     </div>
-                </div>
-            }
-        </div>
-    </div>
-</section>
+                }
+            </div>
+        </section>
 
-<!-- Popular Comics Section -->
-<section class="mb-5" id="popular-comics">
-    <div class="container">
-        <div class="section-header d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title">
-                <i class="fas fa-fire text-warning me-2"></i>
-                Truyện phổ biến
-            </h2>
-        </div>
-        
-        <div class="row g-4">
-            @if (ViewBag.PopularComics != null)
-            {
-                @foreach (var comic in (List<WebTruyenHay.Models.Comic>)ViewBag.PopularComics)
+        <!-- Truyện phổ biến -->
+        <section class="comics-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-fire"></i>
+                    Truyện phổ biến
+                </h2>
+            </div>
+              <div class="popular-comics-grid">
+                @if (ViewBag.PopularComics != null)
                 {
-                    <div class="col-lg-4 col-md-6">
-                        <div class="popular-comic-card">
-                            <div class="row g-0">
-                                <div class="col-4">
+                    var popularComics = (List<WebTruyenHay.Models.Comic>)ViewBag.PopularComics;
+                    if (popularComics.Any())
+                    {
+                        @foreach (var comic in popularComics)
+                        {
+                            <div class="popular-comic-card">
+                                <a href="@Url.Action("Details", "Comics", new { id = comic.Id })" class="popular-comic-link">
                                     <div class="popular-comic-image">
                                         <img src="@(string.IsNullOrEmpty(comic.CoverImageUrl) ? "/images/no-image.svg" : comic.CoverImageUrl)" 
                                              alt="@comic.Title">
                                     </div>
-                                </div>
-                                <div class="col-8">
-                                    <div class="popular-comic-content">
-                                        <h6 class="popular-comic-title">
-                                            <a href="@Url.Action("Details", "Comics", new { id = comic.Id })">
-                                                @comic.Title
-                                            </a>
-                                        </h6>
-                                        <p class="popular-comic-author">
-                                            <i class="fas fa-user me-1"></i>
-                                            @comic.Author
-                                        </p>
+                                    <div class="popular-comic-info">
+                                        <h4 class="popular-comic-title">@comic.Title</h4>
+                                        <p class="popular-comic-author">@comic.Author</p>
                                         <div class="popular-comic-stats">
                                             <span class="stat-item">
-                                                <i class="fas fa-eye me-1"></i>
+                                                <i class="fas fa-eye"></i>
                                                 @comic.ViewCount.ToString("N0")
                                             </span>
                                             @if (comic.Chapters.Any())
                                             {
                                                 var latestChapter = comic.Chapters.OrderByDescending(c => c.UpdatedDate).First();
                                                 <span class="stat-item">
-                                                    <i class="fas fa-bookmark me-1"></i>
+                                                    <i class="fas fa-bookmark"></i>
                                                     Ch. @latestChapter.ChapterNumber
                                                 </span>
                                             }
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-content-message">
+                            <i class="fas fa-book-open"></i>
+                            <h4>Chưa có truyện phổ biến</h4>
+                            <p>Hãy thêm một số truyện và tăng lượt xem để hiển thị ở đây.</p>
                         </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-content-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h4>Đang tải dữ liệu...</h4>
+                        <p>Vui lòng đợi trong giây lát.</p>
                     </div>
                 }
-            }
-        </div>
-    </div>
-</section>
+            </div>
+        </section>
 
-<!-- New Comics Section -->
-<section class="mb-5">
-    <div class="container">
-        <div class="section-header d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title">
-                <i class="fas fa-star text-success me-2"></i>
-                Truyện mới nhất
-            </h2>
-        </div>
-        
-        <div class="row g-4">
-            @if (ViewBag.NewComics != null)
-            {
-                @foreach (var comic in (List<WebTruyenHay.Models.Comic>)ViewBag.NewComics)
+        <!-- Truyện mới nhất -->
+        <section class="comics-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i>
+                    Truyện mới nhất
+                </h2>
+            </div>
+            
+            <div class="comics-grid">
+                @if (ViewBag.NewComics != null)
                 {
-                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6">
-                        <div class="comic-card-modern">
-                            <a href="@Url.Action("Details", "Comics", new { id = comic.Id })" class="text-decoration-none">
-                                <div class="comic-image-container">
+                    @foreach (var comic in (List<WebTruyenHay.Models.Comic>)ViewBag.NewComics)
+                    {
+                        <div class="comic-card">
+                            <a href="@Url.Action("Details", "Comics", new { id = comic.Id })" class="comic-link">
+                                <div class="comic-image-wrapper">
                                     <img src="@(string.IsNullOrEmpty(comic.CoverImageUrl) ? "/images/no-image.svg" : comic.CoverImageUrl)" 
-                                         class="comic-image" alt="@comic.Title">
+                                         alt="@comic.Title" class="comic-image">
                                     <div class="comic-overlay">
-                                        <div class="new-badge">
-                                            <i class="fas fa-star me-1"></i>
-                                            MỚI
+                                        <div class="new-badge">MỚI</div>
+                                        <div class="comic-stats">
+                                            <span class="view-count">
+                                                <i class="fas fa-eye"></i>
+                                                @comic.ViewCount.ToString("N0")
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="comic-content">
-                                    <h6 class="comic-title" title="@comic.Title">@comic.Title</h6>
+                                
+                                <div class="comic-info">
+                                    <h3 class="comic-title">@comic.Title</h3>
                                     <p class="comic-author">@comic.Author</p>
+                                    
+                                    <!-- Recent Chapters -->
+                                    <div class="recent-chapters">
+                                        @if (comic.Chapters.Any())
+                                        {
+                                            var recentChapters = comic.Chapters.OrderByDescending(c => c.UpdatedDate).Take(3);
+                                            foreach (var chapter in recentChapters)
+                                            {
+                                                <div class="chapter-item">
+                                                    <span class="chapter-number">@chapter.ChapterNumber</span>
+                                                    <span class="chapter-time">@chapter.UpdatedDate.ToString("dd/MM")</span>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="chapter-item">
+                                                <span class="no-chapters">Chưa có chương</span>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </a>
                         </div>
-                    </div>
+                    }
                 }
-            }        </div>
+            </div>
+        </section>
     </div>
-</section>
 </div>
 
 @section Styles {
     <style>
-        /* === MAIN CONTENT WRAPPER === */
-        .main-content {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px 20px 0 0;
-            margin-top: -20px;
+        /* Reset và base styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .home-container {
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: rgba(0, 0, 0, 0.3);
             padding: 2rem 0;
-        }
-        
-        /* === HERO SECTION === */
-        .hero-section {
-            background: transparent;
-            padding: 2rem 0;
-        }
-        
-        .hero-card {
-            padding: 3rem;
-            border-radius: 20px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        
-        .hero-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .hero-buttons .btn {
-            margin: 0.25rem;
-        }
-        
-        /* === SECTION HEADERS === */
-        .section-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 0;
-        }
-        
-        .section-header {
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 1rem;
             margin-bottom: 2rem;
         }
-        
-        /* === MODERN COMIC CARDS === */
-        .comic-card-modern {
-            background: white;
-            border-radius: 15px;
+
+        .hero-content {
+            text-align: center;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        /* Section Headers */
+        .comics-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: #ffd700;
+        }
+
+        .view-all-btn {
+            color: white;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .view-all-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* Comics Grid */
+        .comics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+            padding: 0 1rem;
+        }
+
+        .comic-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            height: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        
-        .comic-card-modern:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+
+        .comic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
-        
-        .comic-image-container {
+
+        .comic-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .comic-image-wrapper {
             position: relative;
+            aspect-ratio: 3/4;
             overflow: hidden;
-            height: 280px;
         }
-        
+
         .comic-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
         }
-        
-        .comic-card-modern:hover .comic-image {
+
+        .comic-card:hover .comic-image {
             transform: scale(1.05);
         }
-        
+
         .comic-overlay {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+            background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.8));
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0.5rem;
             opacity: 0;
             transition: opacity 0.3s ease;
-            display: flex;
-            align-items: flex-end;
-            padding: 1rem;
         }
-        
-        .comic-card-modern:hover .comic-overlay {
+
+        .comic-card:hover .comic-overlay {
             opacity: 1;
         }
-        
-        .comic-info {
-            color: white;
-            font-weight: 500;
+
+        .comic-stats {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
         }
-        
-        .chapter-count {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            font-size: 0.875rem;
-        }
-        
-        .new-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+
+        .view-count, .rating {
+            background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
             font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
-        
-        .comic-content {
-            padding: 1.25rem;
-        }
-        
-        .comic-title {
-            font-size: 1rem;
+
+        .new-badge {
+            background: #ff4757;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
             font-weight: 600;
+            align-self: flex-start;
+        }
+
+        .comic-info {
+            padding: 1rem;
+        }
+
+        .comic-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
             color: #2c3e50;
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            line-height: 1.3;
         }
-        
+
         .comic-author {
+            font-size: 0.8rem;
             color: #7f8c8d;
-            font-size: 0.875rem;
-            margin-bottom: 0.75rem;
+            margin: 0 0 0.75rem 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
-        
-        .latest-chapter .badge {
+
+        .recent-chapters {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: #f8f9fa;
+            border-radius: 6px;
             font-size: 0.75rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
         }
-        
-        /* === POPULAR COMIC CARDS === */
+
+        .chapter-number {
+            font-weight: 600;
+            color: #e74c3c;
+        }
+
+        .chapter-time {
+            color: #7f8c8d;
+        }
+
+        .no-chapters {
+            color: #bdc3c7;
+            font-style: italic;
+        }        /* Popular Comics */
+        .popular-comics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+
         .popular-comic-card {
-            background: white;
-            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.95), rgba(52, 73, 94, 0.95));
+            border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            height: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }        .popular-comic-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
-        
-        .popular-comic-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+
+        .popular-comic-link {
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            gap: 1rem;
         }
-        
+
         .popular-comic-image {
-            height: 120px;
+            width: 80px;
+            height: 100px;
+            border-radius: 8px;
             overflow: hidden;
+            flex-shrink: 0;
         }
-        
+
         .popular-comic-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
         }
-        
-        .popular-comic-card:hover .popular-comic-image img {
-            transform: scale(1.1);
-        }
-        
-        .popular-comic-content {
-            padding: 1.25rem;
-            height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        
-        .popular-comic-title {
-            margin: 0 0 0.5rem 0;
+
+        .popular-comic-info {
+            flex: 1;
+        }        .popular-comic-title {
             font-size: 1rem;
             font-weight: 600;
-        }
-        
-        .popular-comic-title a {
-            color: #2c3e50;
-            text-decoration: none;
+            margin: 0 0 0.25rem 0;
+            color: white;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .popular-comic-author {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .popular-comic-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }        .stat-item i {
+            color: #74b9ff;
+        }
+
+        /* No content message */
+        .no-content-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
+
+        .no-content-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #bdc3c7;
+        }
+
+        .no-content-message h4 {
+            margin: 0 0 0.5rem 0;
+            color: #2c3e50;
+        }
+
+        .no-content-message p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .comics-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+
+            .popular-comics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .comics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .popular-comic-link {
+                padding: 0.75rem;
+            }
+
+            .popular-comic-image {
+                width: 60px;
+                height: 75px;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Add loading animation
+        $(document).ready(function() {
+            $('.comic-card').each(function(index) {
+                $(this).css('animation-delay', (index * 50) + 'ms');
+                $(this).addClass('fade-in-up');
+            });
+        });
+    </script>
+      <style>
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }        .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        /* Override for popular comics - Force dark theme */
+        .popular-comic-card {
+            background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
         }
         
-        .popular-comic-title a:hover {
-            color: #667eea;
+        .popular-comic-link {
+            color: white !important;
+        }
+        
+        .popular-comic-title {
+            color: white !important;
         }
         
         .popular-comic-author {
-            color: #7f8c8d;
-            font-size: 0.875rem;
-            margin: 0 0 0.75rem 0;
-        }
-        
-        .popular-comic-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8) !important;
         }
         
         .stat-item {
-            color: #95a5a6;
-            font-weight: 500;
-        }
-        
-        .stat-item:first-child {
-            color: #667eea;
-        }
-          .stat-item:last-child {
-            color: #27ae60;
-        }
-        
-        /* === RESPONSIVE === */
-        @@media (max-width: 768px) {
-            .section-title {
-                font-size: 1.5rem;
-            }
-            
-            .hero-card {
-                padding: 2rem 1rem;
-            }
-            
-            .comic-image-container {
-                height: 220px;
-            }
-            
-            .popular-comic-content {
-                height: auto;
-                min-height: 100px;
-            }
-            
-            .hero-buttons {
-                text-align: center;
-            }
-        }
-        
-        @@media (max-width: 576px) {
-            .comic-image-container {
-                height: 200px;            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-            
-            .section-header .btn {
-                margin-top: 1rem;
-            }
+            color: rgba(255, 255, 255, 0.9) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
         }
     </style>
 }

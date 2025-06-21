@@ -1,0 +1,96 @@
+@page
+@model ExternalLoginModel
+@{
+    ViewData["Title"] = "Liên kết tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card glass-effect">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h2 class="text-gradient">Liên kết tài khoản @Model.ProviderDisplayName</h2>
+                        <p class="text-muted">
+                            Bạn đã đăng nhập thành công với <strong>@Model.ProviderDisplayName</strong>.
+                        </p>
+                        
+                        @if (!string.IsNullOrEmpty(Model.Email))
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-envelope me-2"></i>
+                                Email: <strong>@Model.Email</strong>
+                            </div>
+                        }
+                    </div>
+
+                    @if (Model.IsRegistration)
+                    {
+                        <div class="alert alert-warning mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Để hoàn tất đăng ký, vui lòng đặt mật khẩu cho tài khoản. 
+                            Điều này sẽ cho phép bạn đăng nhập bằng cả email/mật khẩu và @Model.ProviderDisplayName.
+                        </div>
+                        
+                        <form id="external-login" asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                            
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Email" class="form-control" readonly />
+                                <label asp-for="Input.Email">Email</label>
+                            </div>
+                            
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Mật khẩu" />
+                                <label asp-for="Input.Password">Mật khẩu</label>
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-lock me-1"></i>
+                                        Mật khẩu tối thiểu 6 ký tự, có chữ hoa, chữ thường và số
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-floating mb-4">
+                                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Xác nhận mật khẩu" />
+                                <label asp-for="Input.ConfirmPassword">Xác nhận mật khẩu</label>
+                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                                <i class="fas fa-user-check me-2"></i>
+                                Hoàn tất đăng ký
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mb-4">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Tài khoản của bạn đã được liên kết với @Model.ProviderDisplayName.
+                        </div>
+                        
+                        <form id="external-login" asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Tiếp tục đăng nhập
+                            </button>
+                        </form>
+                    }
+                    
+                    <div class="text-center mt-4">
+                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại trang đăng nhập
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

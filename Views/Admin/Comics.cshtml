@@ -9,12 +9,18 @@
         <a href="@Url.Action("CreateComic", "Admin")" class="btn btn-primary">
             <i class="fas fa-plus me-1"></i>Thêm truyện mới
         </a>
-    </div>
-
-    @if (TempData["Success"] != null)
+    </div>    @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -86,9 +92,8 @@
                                         <a href="@Url.Action("Chapters", "Admin", new { id = comic.Id })" 
                                            class="btn btn-outline-info btn-sm">
                                             <i class="fas fa-list"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                onclick="confirmDelete(@comic.Id, '@comic.Title')">
+                                        </a>                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="deleteComic(@comic.Id, '@Html.Raw(Html.Encode(comic.Title).Replace("'", "\\'"))')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -114,35 +119,31 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Xác nhận xóa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Bạn có chắc chắn muốn xóa truyện <strong id="comicTitle"></strong>?</p>
-                <p class="text-danger"><small>Hành động này không thể hoàn tác.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <form id="deleteForm" method="post" style="display: inline;">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger">Xóa</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Hidden form for delete action -->
+<form id="deleteForm" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteComicId" />
+</form>
 
 <script>
-function confirmDelete(comicId, comicTitle) {
-    document.getElementById('comicTitle').textContent = comicTitle;
-    document.getElementById('deleteForm').action = '@Url.Action("DeleteComic", "Admin")/' + comicId;
-    
-    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
+function deleteComic(comicId, comicTitle) {
+    // Use native confirm dialog - no modal issues
+    if (confirm(`Bạn có chắc chắn muốn xóa truyện "${comicTitle}"?\n\nHành động này không thể hoàn tác!`)) {
+        // Set the ID and submit form
+        document.getElementById('deleteComicId').value = comicId;
+        var form = document.getElementById('deleteForm');
+        form.action = '@Url.Action("DeleteComic", "Admin")';
+        form.submit();
+    }
 }
+
+// Clean up any modal remnants on page load
+document.addEventListener('DOMContentLoaded', function() {
+    var backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(function(backdrop) { backdrop.remove(); });
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+});
+</script>
 </script>

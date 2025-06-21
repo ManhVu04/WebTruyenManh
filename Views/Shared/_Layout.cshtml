@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -9,13 +11,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- CSS Libraries -->
+      <!-- CSS Libraries -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />    <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/comic-components.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dark-theme.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dark-theme-enhancements.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/identity-pages.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebTruyenHay.styles.css" asp-append-version="true" />
     
     @await RenderSectionAsync("Styles", required: false)
@@ -50,6 +54,14 @@
                             <i class="fas fa-tags me-1"></i>Thể Loại
                         </a>
                     </li>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link px-3 rounded-3 mx-1" asp-area="" asp-controller="Follow" asp-action="MyFollows">
+                                <i class="fas fa-heart me-1"></i>Theo Dõi
+                            </a>
+                        </li>
+                    }
                     @if (User.IsInRole("Admin"))
                     {
                         <li class="nav-item">
@@ -102,12 +114,52 @@
                 </div>
             </div>
         </div>
-    </footer>
-
-    <!-- Scripts -->
+    </footer>    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- Global Modal Cleanup Script -->
+    <script>
+        // Global modal cleanup function
+        function globalModalCleanup() {
+            // Remove all modal backdrops
+            document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+                backdrop.remove();
+            });
+            
+            // Clean up body classes and styles
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+        
+        // Run cleanup on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            globalModalCleanup();
+        });
+        
+        // Run cleanup on page visibility change (when user comes back to tab)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                setTimeout(globalModalCleanup, 100);
+            }
+        });
+        
+        // Cleanup before page unload
+        window.addEventListener('beforeunload', function() {
+            globalModalCleanup();
+        });
+        
+        // Emergency cleanup every 10 seconds
+        setInterval(function() {
+            // Only cleanup if no modal is currently showing
+            if (!document.querySelector('.modal.show')) {
+                globalModalCleanup();
+            }
+        }, 10000);
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

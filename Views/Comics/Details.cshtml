@@ -1,56 +1,63 @@
-@model WebTruyenHay.Models.Comic
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@model WebTruyenHay.Models.ViewModels.ComicDetailsViewModel
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.Comic.Title;
 }
+
+@Html.AntiForgeryToken()
 
 <div class="container mt-4">
     <div class="row">
         <div class="col-lg-4">
-            <div class="card">
-                <img src="@(string.IsNullOrEmpty(Model.CoverImageUrl) ? "/images/no-image.jpg" : Model.CoverImageUrl)" 
-                     class="card-img-top" alt="@Model.Title" style="height: 500px; object-fit: cover;">
+            <div class="card">                <img src="@(string.IsNullOrEmpty(Model.Comic.CoverImageUrl) ? "/images/no-image.jpg" : Model.Comic.CoverImageUrl)" 
+                     class="card-img-top" alt="@Model.Comic.Title" style="height: 500px; object-fit: cover;">
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        @if (Model.Chapters.Any())
+                        @if (Model.Comic.Chapters.Any())
                         {
-                            var firstChapter = Model.Chapters.OrderBy(c => c.ChapterNumber).First();
-                            <a href="@Url.Action("Read", "Comics", new { id = Model.Id, chapter = firstChapter.ChapterNumber })" 
+                            var firstChapter = Model.Comic.Chapters.OrderBy(c => c.ChapterNumber).First();
+                            <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = firstChapter.ChapterNumber })" 
                                class="btn btn-primary btn-lg">
                                 <i class="fas fa-book-open me-2"></i>Đọc từ đầu
                             </a>
                             
-                            var latestChapter = Model.Chapters.OrderByDescending(c => c.ChapterNumber).First();
+                            var latestChapter = Model.Comic.Chapters.OrderByDescending(c => c.ChapterNumber).First();
                             if (latestChapter.ChapterNumber > 1)
                             {
-                                <a href="@Url.Action("Read", "Comics", new { id = Model.Id, chapter = latestChapter.ChapterNumber })" 
+                                <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = latestChapter.ChapterNumber })" 
                                    class="btn btn-outline-primary">
                                     <i class="fas fa-forward me-2"></i>Chương mới nhất
                                 </a>
                             }
+                        }                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <partial name="_FollowButton" model="@(new WebTruyenHay.Models.ViewModels.FollowButtonViewModel { ComicId = Model.Comic.Id, IsFollowing = Model.IsFollowing })" />
                         }
                         else
                         {
-                            <button class="btn btn-secondary" disabled>Chưa có chương nào</button>
+                            <a href="@Url.Action("Login", "Account", new { area = "Identity", returnUrl = Context.Request.Path })" 
+                               class="btn btn-outline-danger">
+                                <i class="fas fa-heart me-2"></i>Đăng nhập để theo dõi
+                            </a>
                         }
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-8">
+        </div>        <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
-                    <h1 class="card-title">@Model.Title</h1>
+                    <h1 class="card-title">@Model.Comic.Title</h1>
                     
                     <div class="row mb-3">
                         <div class="col-sm-3"><strong>Tác giả:</strong></div>
-                        <div class="col-sm-9">@Model.Author</div>
+                        <div class="col-sm-9">@Model.Comic.Author</div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-sm-3"><strong>Trạng thái:</strong></div>
                         <div class="col-sm-9">
-                            @switch (Model.Status)
+                            @switch (Model.Comic.Status)
                             {
                                 case "Đang tiến hành":
                                     <span class="badge bg-success">Đang tiến hành</span>
@@ -67,20 +74,20 @@
                     
                     <div class="row mb-3">
                         <div class="col-sm-3"><strong>Lượt xem:</strong></div>
-                        <div class="col-sm-9">@Model.ViewCount.ToString("N0")</div>
+                        <div class="col-sm-9">@Model.Comic.ViewCount.ToString("N0")</div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-sm-3"><strong>Số chương:</strong></div>
-                        <div class="col-sm-9">@Model.Chapters.Count</div>
+                        <div class="col-sm-9">@Model.Comic.Chapters.Count</div>
                     </div>
                     
-                    @if (Model.ComicGenres.Any())
+                    @if (Model.Comic.ComicGenres.Any())
                     {
                         <div class="row mb-3">
                             <div class="col-sm-3"><strong>Thể loại:</strong></div>
                             <div class="col-sm-9">
-                                @foreach (var genre in Model.ComicGenres)
+                                @foreach (var genre in Model.Comic.ComicGenres)
                                 {
                                     <a href="@Url.Action("Index", "Comics", new { genreId = genre.GenreId })" 
                                        class="badge bg-secondary text-decoration-none me-1">@genre.Genre.Name</a>
@@ -91,15 +98,15 @@
                     
                     <div class="row mb-3">
                         <div class="col-sm-3"><strong>Cập nhật:</strong></div>
-                        <div class="col-sm-9">@Model.UpdatedDate.ToString("dd/MM/yyyy HH:mm")</div>
+                        <div class="col-sm-9">@Model.Comic.UpdatedDate.ToString("dd/MM/yyyy HH:mm")</div>
                     </div>
                     
-                    @if (!string.IsNullOrEmpty(Model.Description))
+                    @if (!string.IsNullOrEmpty(Model.Comic.Description))
                     {
                         <div class="row mb-3">
                             <div class="col-sm-3"><strong>Mô tả:</strong></div>
                             <div class="col-sm-9">
-                                <div class="text-justify">@Html.Raw(Model.Description.Replace("\n", "<br>"))</div>
+                                <div class="text-justify">@Html.Raw(Model.Comic.Description.Replace("\n", "<br>"))</div>
                             </div>
                         </div>
                     }
@@ -112,15 +119,15 @@
                     <h5 class="mb-0">Danh sách chương</h5>
                 </div>
                 <div class="card-body">
-                    @if (Model.Chapters.Any())
+                    @if (Model.Comic.Chapters.Any())
                     {
                         <div class="row">
-                            @foreach (var chapter in Model.Chapters.OrderByDescending(c => c.ChapterNumber))
+                            @foreach (var chapter in Model.Comic.Chapters.OrderByDescending(c => c.ChapterNumber))
                             {
                                 <div class="col-lg-6 col-md-12 mb-2">
                                     <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
                                         <div>
-                                            <a href="@Url.Action("Read", "Comics", new { id = Model.Id, chapter = chapter.ChapterNumber })" 
+                                            <a href="@Url.Action("Read", "Comics", new { id = Model.Comic.Id, chapter = chapter.ChapterNumber })" 
                                                class="text-decoration-none fw-bold">
                                                 Chương @chapter.ChapterNumber: @chapter.Title
                                             </a>
@@ -140,7 +147,18 @@
                         </div>
                     }
                 </div>
-            </div>
-        </div>
+            </div></div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Đảm bảo jQuery đã load và khởi tạo follow button
+        $(document).ready(function() {
+            // Kiểm tra nếu có follow button trên trang
+            if ($('.follow-btn').length > 0) {
+                console.log('Follow button found, initializing...');
+            }
+        });
+    </script>
+}

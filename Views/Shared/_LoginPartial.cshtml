@@ -1,23 +1,35 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using WebTruyenHay.Helpers
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Quản lý tài khoản">
-            <i class="fas fa-user me-1"></i>@User.Identity?.Name!
+{    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Quản lý tài khoản">
+            <img src="@GravatarHelper.GetGravatarUrl(User.Identity?.Name ?? "")" 
+                 alt="Avatar" 
+                 class="rounded-circle me-2" 
+                 style="width: 32px; height: 32px; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);"
+                 onerror="this.src='@GravatarHelper.GetInitialsAvatarUrl(User.Identity?.Name ?? "User")'">
+            <span class="d-none d-md-inline text-light">@User.Identity?.Name</span>
         </a>
-    </li>
-    <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button type="submit" class="nav-link btn btn-link text-light">
-                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
-            </button>
-        </form>
-    </li>
-}
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+            <li>
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                    <i class="fas fa-user me-2"></i>Quản lý tài khoản
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                    <button type="submit" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </li>}
 else
 {
     <li class="nav-item">

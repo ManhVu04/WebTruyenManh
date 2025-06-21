@@ -1,17 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using WebTruyenHay.Data;
 using WebTruyenHay.Models;
+using WebTruyenHay.Models.ViewModels;
 
 namespace WebTruyenHay.Controllers
-{
-    public class ComicsController : Controller
+{    public class ComicsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ComicsController(ApplicationDbContext context)
+        public ComicsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Comics
@@ -52,9 +55,7 @@ namespace WebTruyenHay.Controllers
             ViewBag.TotalPages = totalPages;
 
             return View(comicsToShow);
-        }
-
-        // GET: Comics/Details/5
+        }        // GET: Comics/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -75,31 +76,45 @@ namespace WebTruyenHay.Controllers
 
             // Increase view count
             comic.ViewCount++;
-            await _context.SaveChangesAsync();
-
-            return View(comic);
-        }
-
-        // GET: Comics/Read/5?chapter=1
-        public async Task<IActionResult> Read(int? id, int chapter = 1)
-        {
-            if (id == null)
+            await _context.SaveChangesAsync();            // Kiểm tra trạng thái theo dõi của user hiện tại
+            bool isFollowing = false;
+            if (User.Identity?.IsAuthenticated == true)
             {
-                return NotFound();
+                var userId = _userManager.GetUserId(User);
+                if (userId != null)
+                {
+                    isFollowing = await _context.Follows
+                        .AnyAsync(f => f.UserId == userId && f.ComicId == id);
+                }
             }
 
-            var comic = await _context.Comics
+            var viewModel = new ComicDetailsViewModel
+            {
+                Comic = comic,
+                IsFollowing = isFollowing
+            };
+
+            return View(viewModel);
+        }// GET: Comics/Read/5?chapter=1 hoặc Comics/Read?comicId=5&chapterNumber=1
+        public async Task<IActionResult> Read(int? id, int chapter = 1, int? comicId = null, int? chapterNumber = null)
+        {
+            // Hỗ trợ cả 2 định dạng tham số
+            var targetComicId = id ?? comicId;
+            var targetChapter = chapterNumber ?? chapter;
+            
+            if (targetComicId == null)
+            {
+                return NotFound();
+            }            var comic = await _context.Comics
                 .Include(c => c.Chapters.Where(ch => ch.IsActive))
                 .ThenInclude(ch => ch.ChapterImages)
-                .FirstOrDefaultAsync(c => c.Id == id && c.IsActive);
+                .FirstOrDefaultAsync(c => c.Id == targetComicId && c.IsActive);
 
             if (comic == null)
             {
                 return NotFound();
-            }
-
-            var currentChapter = comic.Chapters
-                .FirstOrDefault(ch => ch.ChapterNumber == chapter);
+            }            var currentChapter = comic.Chapters
+                .FirstOrDefault(ch => ch.ChapterNumber == targetChapter);
 
             if (currentChapter == null)
             {
@@ -112,7 +127,7 @@ namespace WebTruyenHay.Controllers
 
             ViewBag.Comic = comic;
             ViewBag.AllChapters = comic.Chapters.OrderBy(ch => ch.ChapterNumber).ToList();
-            ViewBag.CurrentChapterNumber = chapter;
+            ViewBag.CurrentChapterNumber = targetChapter;
             ViewBag.Comments = await _context.Comments
                 .Where(c => c.ChapterId == currentChapter.Id)
                 .OrderByDescending(c => c.CreatedAt)
