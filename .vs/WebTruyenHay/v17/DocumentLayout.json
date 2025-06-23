@@ -3,6 +3,26 @@
   "WorkspaceRootPath": "X:\\WebTruyenHay\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\views\\admin\\createcomic.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:views\\admin\\createcomic.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\controllers\\commentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:controllers\\commentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\controllers\\followcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:controllers\\followcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\controllers\\comicscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:controllers\\comicscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\views\\admin\\editchapter.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:views\\admin\\editchapter.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
@@ -19,15 +39,75 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "CreateComic.cshtml",
+              "DocumentMoniker": "X:\\WebTruyenHay\\Views\\Admin\\CreateComic.cshtml",
+              "RelativeDocumentMoniker": "Views\\Admin\\CreateComic.cshtml",
+              "ToolTip": "X:\\WebTruyenHay\\Views\\Admin\\CreateComic.cshtml",
+              "RelativeToolTip": "Views\\Admin\\CreateComic.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-21T16:28:30.397Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ErrorViewModel.cs",
+              "DocumentMoniker": "X:\\WebTruyenHay\\Models\\ErrorViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\ErrorViewModel.cs",
+              "ToolTip": "X:\\WebTruyenHay\\Models\\ErrorViewModel.cs",
+              "RelativeToolTip": "Models\\ErrorViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-21T16:28:26.903Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CommentsController.cs",
+              "DocumentMoniker": "X:\\WebTruyenHay\\Controllers\\CommentsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CommentsController.cs",
+              "ToolTip": "X:\\WebTruyenHay\\Controllers\\CommentsController.cs",
+              "RelativeToolTip": "Controllers\\CommentsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-21T16:28:21.5Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FollowController.cs",
+              "DocumentMoniker": "X:\\WebTruyenHay\\Controllers\\FollowController.cs",
+              "RelativeDocumentMoniker": "Controllers\\FollowController.cs",
+              "ToolTip": "X:\\WebTruyenHay\\Controllers\\FollowController.cs",
+              "RelativeToolTip": "Controllers\\FollowController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-21T16:28:20.363Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ComicsController.cs",
+              "DocumentMoniker": "X:\\WebTruyenHay\\Controllers\\ComicsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ComicsController.cs",
+              "ToolTip": "X:\\WebTruyenHay\\Controllers\\ComicsController.cs",
+              "RelativeToolTip": "Controllers\\ComicsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-21T16:28:19.706Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "EditChapter.cshtml",
               "DocumentMoniker": "X:\\WebTruyenHay\\Views\\Admin\\EditChapter.cshtml",
               "RelativeDocumentMoniker": "Views\\Admin\\EditChapter.cshtml",
               "ToolTip": "X:\\WebTruyenHay\\Views\\Admin\\EditChapter.cshtml",
               "RelativeToolTip": "Views\\Admin\\EditChapter.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-21T12:43:26.719Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-21T12:43:26.719Z"
             }
           ]
         }
