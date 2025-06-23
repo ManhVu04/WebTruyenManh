@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "X:\\WebTruyenHay\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\controllers\\comicscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:controllers\\comicscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\views\\admin\\createcomic.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:views\\admin\\createcomic.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -19,10 +23,6 @@
       "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:controllers\\followcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\controllers\\comicscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:controllers\\comicscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|x:\\webtruyenhay\\views\\admin\\editchapter.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{8D1E40B1-155F-4479-8C21-7F46699AB8C9}|WebTruyenHay.csproj|solutionrelative:views\\admin\\editchapter.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
@@ -34,11 +34,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "CreateComic.cshtml",
               "DocumentMoniker": "X:\\WebTruyenHay\\Views\\Admin\\CreateComic.cshtml",
               "RelativeDocumentMoniker": "Views\\Admin\\CreateComic.cshtml",
@@ -46,12 +46,11 @@
               "RelativeToolTip": "Views\\Admin\\CreateComic.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-21T16:28:30.397Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-21T16:28:30.397Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "ErrorViewModel.cs",
               "DocumentMoniker": "X:\\WebTruyenHay\\Models\\ErrorViewModel.cs",
               "RelativeDocumentMoniker": "Models\\ErrorViewModel.cs",
@@ -63,7 +62,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "CommentsController.cs",
               "DocumentMoniker": "X:\\WebTruyenHay\\Controllers\\CommentsController.cs",
               "RelativeDocumentMoniker": "Controllers\\CommentsController.cs",
@@ -75,7 +74,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "FollowController.cs",
               "DocumentMoniker": "X:\\WebTruyenHay\\Controllers\\FollowController.cs",
               "RelativeDocumentMoniker": "Controllers\\FollowController.cs",
@@ -87,15 +86,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "ComicsController.cs",
               "DocumentMoniker": "X:\\WebTruyenHay\\Controllers\\ComicsController.cs",
               "RelativeDocumentMoniker": "Controllers\\ComicsController.cs",
               "ToolTip": "X:\\WebTruyenHay\\Controllers\\ComicsController.cs",
               "RelativeToolTip": "Controllers\\ComicsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-21T16:28:19.706Z"
+              "WhenOpened": "2025-06-21T16:28:19.706Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

@@ -112,6 +112,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29taWNzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[X:/WebTruyenHay/Views/Comics/Details_Fixed.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29taWNzXERldGFpbHNfRml4ZWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [X:/WebTruyenHay/Views/Comics/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29taWNzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

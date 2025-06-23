@@ -1127,8 +1127,13 @@ $(document).ready(function() {
                 }, 2000);
             }
         }
-    );// Show navigation when pressing keyboard shortcuts
+    );    // Show navigation when pressing keyboard shortcuts
     $(document).keydown(function(e) {
+        // Don't interfere with keyboard shortcuts when user is typing
+        if ($(e.target).is('input, textarea, [contenteditable]') || $(e.target).closest('.comment-form').length > 0) {
+            return; // Allow normal input behavior
+        }
+        
         // Arrow keys for navigation
         if (e.which === 37) { // Left arrow - Previous chapter
             e.preventDefault();
@@ -1146,9 +1151,13 @@ $(document).ready(function() {
             }
             return;
         }
-        
-        // Space bar for scroll down, Shift+Space for scroll up
+          // Space bar for scroll down, Shift+Space for scroll up
         if (e.which === 32) { // Space
+            // Don't prevent default if user is typing in input/textarea/contenteditable
+            if ($(e.target).is('input, textarea, [contenteditable]') || $(e.target).closest('.comment-form').length > 0) {
+                return; // Allow normal space input
+            }
+            
             e.preventDefault();
             const scrollAmount = $(window).height() * 0.8;
             if (e.shiftKey) {
@@ -1163,8 +1172,7 @@ $(document).ready(function() {
                 }, 300);
             }
         }
-        
-        // Home and End keys
+          // Home and End keys
         if (e.which === 36) { // Home - Go to top
             e.preventDefault();
             $('html, body').animate({ scrollTop: 0 }, 500);
@@ -1172,7 +1180,7 @@ $(document).ready(function() {
         if (e.which === 35) { // End - Go to bottom
             e.preventDefault();
             $('html, body').animate({ scrollTop: $(document).height() }, 500);
-        }        // Show nav on certain keys
+        }// Show nav on certain keys
         if (e.which === 37 || e.which === 39 || e.which === 32 || e.which === 33 || e.which === 34 || e.which === 77) { // M key
             if (isStickyMode) {
                 showNavigation();

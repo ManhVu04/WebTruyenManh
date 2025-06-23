@@ -217,9 +217,7 @@ namespace WebTruyenHay.Controllers
             var genres = await _context.Genres.ToListAsync();
             ViewBag.Genres = genres;
             return View(model);
-        }
-
-        // GET: Admin/Chapters/5
+        }        // GET: Admin/Chapters/5
         public async Task<IActionResult> Chapters(int? id)
         {
             if (id == null)
@@ -229,6 +227,7 @@ namespace WebTruyenHay.Controllers
 
             var comic = await _context.Comics
                 .Include(c => c.Chapters)
+                .ThenInclude(ch => ch.ChapterImages)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (comic == null)
@@ -482,7 +481,42 @@ namespace WebTruyenHay.Controllers
                 
                 if (comic != null)
                 {
-                    // Xóa ảnh bìa truyện nếu có
+                    // Delete related data first to avoid foreign key constraints
+                    foreach (var chapter in comic.Chapters)
+                    {
+                        // Delete comments for each chapter
+                        var comments = await _context.Comments.Where(c => c.ChapterId == chapter.Id).ToListAsync();
+                        if (comments.Any())
+                        {
+                            _context.Comments.RemoveRange(comments);
+                        }
+                        
+                        // Delete reading history for each chapter
+                        var readingHistories = await _context.ReadingHistories.Where(rh => rh.ChapterId == chapter.Id).ToListAsync();
+                        if (readingHistories.Any())
+                        {
+                            _context.ReadingHistories.RemoveRange(readingHistories);
+                        }
+                    }
+                    
+                    // Delete follows for this comic
+                    var follows = await _context.Follows.Where(f => f.ComicId == id).ToListAsync();
+                    if (follows.Any())
+                    {
+                        _context.Follows.RemoveRange(follows);
+                    }
+                    
+                    // Delete reading histories for this comic (those without specific chapters)
+                    var comicReadingHistories = await _context.ReadingHistories.Where(rh => rh.ComicId == id).ToListAsync();
+                    if (comicReadingHistories.Any())
+                    {
+                        _context.ReadingHistories.RemoveRange(comicReadingHistories);
+                    }
+                    
+                    // Save changes for related data first
+                    await _context.SaveChangesAsync();
+
+                    // Delete cover image if exists
                     if (!string.IsNullOrEmpty(comic.CoverImageUrl))
                     {
                         var coverPath = Path.Combine(_webHostEnvironment.WebRootPath, comic.CoverImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
@@ -490,7 +524,7 @@ namespace WebTruyenHay.Controllers
                             System.IO.File.Delete(coverPath);
                     }
 
-                    // Xóa ảnh các chap và thư mục chứa ảnh
+                    // Delete chapter images and folders
                     foreach (var chapter in comic.Chapters)
                     {
                         if (chapter.ChapterImages != null)
@@ -501,14 +535,14 @@ namespace WebTruyenHay.Controllers
                                 if (System.IO.File.Exists(imgPath))
                                     System.IO.File.Delete(imgPath);
                             }
-                            // Xóa thư mục chứa ảnh của chap
+                            // Delete chapter folder
                             var chapterFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "chapters", chapter.Id.ToString());
                             if (Directory.Exists(chapterFolder))
                                 Directory.Delete(chapterFolder, true);
                         }
                     }
 
-                    // Xóa dữ liệu trong database
+                    // Finally delete the comic (this will cascade delete chapters and images)
                     _context.Comics.Remove(comic);
                     await _context.SaveChangesAsync();
                     TempData["Success"] = "Xóa truyện thành công!";
@@ -524,7 +558,7 @@ namespace WebTruyenHay.Controllers
             }
             
             return RedirectToAction(nameof(Comics));
-        }        // POST: Admin/DeleteChapter/5
+        }// POST: Admin/DeleteChapter/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteChapter(int id)
@@ -539,23 +573,53 @@ namespace WebTruyenHay.Controllers
                 {
                     var comicId = chapter.ComicId;
                     
-                    // Xóa ảnh các trang của chap
+                    // Delete related data first to avoid foreign key constraints
+                    // Delete comments for this chapter
+                    var comments = await _context.Comments.Where(c => c.ChapterId == id).ToListAsync();
+                    if (comments.Any())
+                    {
+                        _context.Comments.RemoveRange(comments);
+                    }
+                    
+                    // Delete reading history for this chapter
+                    var readingHistories = await _context.ReadingHistories.Where(rh => rh.ChapterId == id).ToListAsync();
+                    if (readingHistories.Any())
+                    {
+                        _context.ReadingHistories.RemoveRange(readingHistories);
+                    }
+                    
+                    // Delete chapter images from database (will be cascaded, but explicit is better)
+                    if (chapter.ChapterImages != null && chapter.ChapterImages.Any())
+                    {
+                        _context.ChapterImages.RemoveRange(chapter.ChapterImages);
+                    }
+                    
+                    // Save changes for related data first
+                    await _context.SaveChangesAsync();
+                    
+                    // Now delete physical files
                     if (chapter.ChapterImages != null)
                     {
                         foreach (var img in chapter.ChapterImages)
                         {
                             var imgPath = Path.Combine(_webHostEnvironment.WebRootPath, img.ImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
                             if (System.IO.File.Exists(imgPath))
+                            {
                                 System.IO.File.Delete(imgPath);
+                            }
                         }
-                        // Xóa thư mục chứa ảnh của chap
+                        // Delete chapter folder
                         var chapterFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "chapters", chapter.Id.ToString());
                         if (Directory.Exists(chapterFolder))
+                        {
                             Directory.Delete(chapterFolder, true);
+                        }
                     }
                     
+                    // Finally delete the chapter itself
                     _context.Chapters.Remove(chapter);
                     await _context.SaveChangesAsync();
+                    
                     TempData["Success"] = "Xóa chương thành công!";
                     return RedirectToAction(nameof(Chapters), new { id = comicId });
                 }
